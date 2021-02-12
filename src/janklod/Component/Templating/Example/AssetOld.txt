@@ -1,0 +1,207 @@
+<?php
+namespace Jan\Component\Templating;
+
+
+/**
+ * Class Asset
+ * @package Jan\Component\Templating
+*/
+class Asset
+{
+
+     const CSS_BLANK = '<link href="%s.css" rel="stylesheet">';
+     const JS_BLANK  = '<script src="%s.js" type="application/javascript"></script>';
+
+     const KEY_CSS   = 'css';
+     const KEY_JS    = 'js';
+
+     const ASSET_KEYS = [
+         self::KEY_CSS,
+         self::KEY_JS
+     ];
+
+
+     /**
+      * @var array
+     */
+     private $css = [];
+
+
+
+     /**
+      * @var array
+     */
+     private $js = [];
+
+
+     /**
+      * @var string
+     */
+     private $baseUrl;
+
+
+     /**
+      * Asset constructor.
+      * @param string $baseUrl
+     */
+     public function __construct(string $baseUrl = '')
+     {
+          if($baseUrl)
+          {
+              $this->baseUrl = trim($baseUrl, '\\/');
+          }
+     }
+
+
+
+     /**
+      * Add css link
+      *
+      * @param string $link
+     */
+     public function css(string $link)
+     {
+          $this->css[] = $link;
+     }
+
+
+     /**
+      * @param array $styles
+     */
+     public function addStylesheets(array $styles)
+     {
+         $this->css = array_merge($this->css, $styles);
+     }
+
+
+     /**
+      * @param array $scripts
+     */
+     public function addScripts(array $scripts)
+     {
+        $this->js = array_merge($this->js, $scripts);
+     }
+
+
+     /**
+      * Get css data
+      *
+      * @return array
+     */
+     public function getStyleSheets(): array
+     {
+          return $this->css;
+     }
+
+
+     /**
+       * Add js link
+       *
+       * @param string $js
+     */
+     public function js(string $js)
+     {
+          $this->js[] = $js;
+     }
+
+
+     /**
+      * Get css data
+      *
+      * @return array
+     */
+     public function getScripts(): array
+     {
+         return $this->js;
+     }
+
+
+     /**
+      * Render css format html
+      *
+      * @return string
+     */
+     public function renderCss(): string
+     {
+         return $this->printHtml($this->css, self::CSS_BLANK);
+     }
+
+
+     /**
+      * @param $link
+      * @return string
+     */
+     public function renderOnceCss($link)
+     {
+         return sprintf(self::CSS_BLANK, $this->url($link));
+     }
+
+
+    /**
+     * @param $script
+     * @return string
+    */
+    public function renderOnceJs($script)
+    {
+        return sprintf(self::JS_BLANK, $this->url($script));
+    }
+
+
+    /**
+     * Render js format html
+     *
+     * @return string
+    */
+    public function renderJs(): string
+    {
+        return $this->printHtml($this->js, self::JS_BLANK);
+    }
+
+
+    /**
+     * Print html format
+     *
+     * @param array $resourceFiles
+     * @param string $blankTemplate
+     * @return string
+    */
+    protected function printHtml(array $resourceFiles, string $blankTemplate): string
+    {
+        $html = [];
+
+        foreach ($resourceFiles as $filename)
+        {
+             $html[] = sprintf($blankTemplate, $this->generateUrl($filename));
+        }
+
+        return join("\n", $html);
+    }
+
+
+    /**
+     * @param $filename
+     * @return string|string[]
+    */
+    public function generateUrl($filename)
+    {
+        $parts = explode('.', $filename);
+        $ext = end($parts);
+
+        if(\in_array($ext, self::ASSET_KEYS))
+        {
+            $filename = str_replace($ext, '', $filename);
+        }
+
+        return $this->url($filename);
+    }
+
+
+    /**
+     * @param $filename
+     * @return string
+    */
+    public function url($filename)
+    {
+        return $this->baseUrl . '/'. trim($filename, '\/');
+    }
+}

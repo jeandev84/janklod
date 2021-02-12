@@ -1,0 +1,245 @@
+<?php
+namespace Jan\Component\Database\ORM;
+
+
+use Jan\Component\Database\Connection\PDO\PDOConnection;
+use Jan\Component\Database\Contract\ManagerInterface;
+use Jan\Component\Database\Contract\QueryInterface;
+use Jan\Component\Database\ORM\Builder\QueryBuilder;
+
+/**
+ * Class ActiveRecord
+ * @package Jan\Component\Database\ORM
+*/
+class ActiveRecord
+{
+
+
+    /**
+     * @var ManagerInterface
+    */
+    protected $manager;
+
+
+
+    /**
+     * @var QueryBuilder
+    */
+    protected $queryBuilder;
+
+
+
+    /**
+     * @var string
+    */
+    protected $entityClass = \stdClass::class;
+
+
+
+    /**
+     * @var string
+    */
+    protected $table;
+
+
+
+    /**
+     * @var string
+    */
+    protected $prefixTable;
+
+
+
+    /**
+     * EntityRepository constructor.
+     *
+     * @param ManagerInterface $manager
+    */
+    public function __construct(ManagerInterface $manager)
+    {
+         $this->manager = $manager;
+
+         if($this->queryBuilder === null)
+         {
+             $this->queryBuilder = new QueryBuilder($manager);
+         }
+
+         $this->prefixTable  = $manager->getConfiguration()->getPrefixTable();
+    }
+
+
+
+    /**
+     * @param $table
+    */
+    public function table($table)
+    {
+         $this->table = $table;
+    }
+
+
+
+    /**
+     * return []
+    */
+    public function findAll()
+    {
+        $data = [
+            'Product1',
+            'Product2',
+            'Product3',
+        ];
+
+        dump($data);
+    }
+
+
+    /**
+     * @param $criteria
+     * @return array
+    */
+    public function find($id)
+    {
+        dump($id);
+    }
+
+
+
+    /**
+     * @param $column
+     * @param $value
+     * @param string $operator
+    */
+    public function where($column, $value, $operator = "=")
+    {
+          dd($column, $value, $operator);
+    }
+
+
+
+
+    /**
+     * @param array $columns
+    */
+    public function insert(array $columns)
+    {
+         $this->queryBuilder->insert($columns);
+    }
+
+
+    /**
+     * @param int $id
+     * @param array $columns
+    */
+    public function update(int $id, array $columns)
+    {
+          $this->queryBuilder->update($id, $columns);
+    }
+
+
+    /**
+     * @param int $id
+     * @param array $columns
+    */
+    public function delete(int $id, array $columns = [])
+    {
+          $this->queryBuilder->delete($id, $columns);
+    }
+
+
+
+    /**
+     * @param string $sql
+     * @param array $params
+     * @return mixed
+    */
+    public function execute(string $sql, array $params = []): QueryInterface
+    {
+        $connection = $this->manager->getConnection();
+
+        if($connection instanceof PDOConnection)
+        {
+            if(! $params)
+            {
+                return $connection->exec($sql);
+            }
+
+            return $connection->query($sql, $params, $this->entityClass)
+                              ->execute();
+        }
+
+        return $connection->exec($sql);
+    }
+
+
+
+    /**
+     * Get all
+    */
+    public function get()
+    {
+
+    }
+
+
+    /**
+     * Get one record
+    */
+    public function one()
+    {
+
+    }
+
+
+    /**
+     * Get first record
+    */
+    public function first()
+    {
+
+    }
+
+
+    /**
+     * @return string
+     * @throws \Exception
+    */
+    protected function getTable(): string
+    {
+        if($this->table)
+        {
+            return $this->getTableWithPrefix($this->table);
+        }
+
+        return $this->getTableDefaultName();
+    }
+
+
+
+    /**
+     * @return string
+     * @throws \ReflectionException
+    */
+    protected function getTableDefaultName(): string
+    {
+        try {
+
+            $tableName = (new \ReflectionClass($this->entityClass))->getName().'s';
+            return $this->getTableWithPrefix($tableName);
+
+        } catch (\ReflectionException $e) {
+
+             throw $e;
+        }
+    }
+
+
+    /**
+     * @param $table
+     * @return string
+    */
+    protected function getTableWithPrefix($table): string
+    {
+        return $this->prefixTable . $table;
+    }
+}

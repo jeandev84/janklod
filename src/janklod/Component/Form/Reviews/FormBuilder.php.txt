@@ -1,0 +1,76 @@
+<?php
+namespace Jan\Foundation\Form;
+
+
+use Jan\Component\Container\Contract\ContainerInterface;
+use Jan\Component\Form\Contract\FormBuilderInterface;
+
+
+
+/**
+ * Class FormBuilder
+ * @package Jan\Foundation\Form
+ *
+ *
+ * TODO Refactoring
+*/
+class FormBuilder implements FormBuilderInterface
+{
+
+    /**
+     * @var Form
+    */
+    protected $form;
+
+
+    /**
+     * FormBuilder constructor.
+     * @param array $options
+    */
+    public function __construct(array $options = [])
+    {
+        $this->form = new Form();
+
+        $this->form->start($options);
+    }
+
+
+    /**
+     * @param string $child
+     * @param string|null $type
+     * @param array $options
+     * @return $this
+    */
+    public function add(string $child, string $type = null, array $options = []): FormBuilder
+    {
+         $this->form->add($child, $type, $options);
+
+         return $this;
+    }
+
+
+    /**
+     * @param $type
+     * @param null $data
+     * @param array $options
+     * @return Form
+    */
+    public function create($type, $data = null, array $options = []): Form
+    {
+          // name : FormType
+          // data: User::class
+
+          return $this->form;
+    }
+
+
+
+    /**
+      * @return Form
+    */
+    public function getForm(): Form
+    {
+        return $this->form;
+    }
+}
+

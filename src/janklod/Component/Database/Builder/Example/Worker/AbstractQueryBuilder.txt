@@ -1,0 +1,393 @@
+<?php
+namespace Jan\Component\Database\ORM\Builder\Support;
+
+
+use Jan\Component\Database\Contract\SQLQueryBuilder;
+use Jan\Component\Database\ORM\Builder\Builder;
+use Jan\Component\Database\ORM\Builder\Type\DeleteType;
+use Jan\Component\Database\ORM\Builder\Type\FromType;
+use Jan\Component\Database\ORM\Builder\Type\InsertType;
+use Jan\Component\Database\ORM\Builder\Type\JoinType;
+use Jan\Component\Database\ORM\Builder\Type\LimitType;
+use Jan\Component\Database\ORM\Builder\Type\OrderByType;
+use Jan\Component\Database\ORM\Builder\Type\SelectDistinctType;
+use Jan\Component\Database\ORM\Builder\Type\SelectType;
+use Jan\Component\Database\ORM\Builder\Type\UpdateType;
+use Jan\Component\Database\ORM\Builder\Type\WhereType;
+
+
+/**
+ * Class AbstractQueryBuilder
+ * @package Jan\Component\Database\ORM\Builder\Support
+*/
+abstract class AbstractQueryBuilder implements SQLQueryBuilder
+{
+
+//    const SELECT    = 'select';
+//    const FROM      = 'from';
+//    const WHERE     = 'where';
+//    const JOIN      = 'join';
+//    const ORDER_BY  = 'orderBy';
+//    const LIMIT     = 'limit';
+//    const HAVING    = 'having';
+//    const UPDATE    = 'update';
+//    const INSERT    = 'insert';
+//    const DELETE    = 'delete';
+//    const TABLE     = 'table';
+
+
+    /**
+     * @var array
+    */
+    protected $sql = [];
+
+
+
+    /**
+     * @var array
+    */
+    protected $types = [];
+
+
+
+    /**
+     * @var string
+    */
+    protected $table;
+
+
+
+    /**
+     * @var string
+    */
+    protected $alias;
+
+
+
+    /**
+     * @var array
+    */
+    protected $parameters = [];
+
+
+
+    /**
+     * @param string $table
+     * @param string $alias
+     * @return SQLQueryBuilder
+    */
+    public function table(string $table, string $alias = ''): SQLQueryBuilder
+    {
+        $this->table = $table;
+        $this->alias = $alias;
+
+        return $this;
+    }
+
+
+    /**
+     * // TODO FIX (arguments, distrinct = false)
+     * @param mixed ...$args
+     * @return SQLQueryBuilder
+     * @throws \Exception
+    */
+    public function select(...$args): SQLQueryBuilder
+    {
+        return $this->addSelect($args);
+    }
+
+
+    /**
+     * @param mixed ...$args
+     * @return SQLQueryBuilder
+     * @throws \Exception
+    */
+    public function selectDistinct(...$args)
+    {
+        return $this->addSelect($args, true);
+    }
+
+
+    /**
+     * @param $sql
+     * @return $this
+     * @throws \Exception
+    */
+    public function addSelect($selects, $distinct = false): SQLQueryBuilder
+    {
+        return $this->addSql(new SelectType($selects, $distinct));
+    }
+
+
+
+    /**
+     * @param $table
+     * @param string $alias
+     * @return SQLQueryBuilder
+     * @throws \Exception
+    */
+    public function from($table, $alias = ''): SQLQueryBuilder
+    {
+        return $this->addSql(new FromType($table, $alias));
+    }
+
+
+
+    /**
+     * @param string $condition
+     * @param string $operator
+     * @return SQLQueryBuilder
+    */
+    public function where(string $condition, string $operator = ''): SQLQueryBuilder
+    {
+         return $this->addWhereSQL($condition, $operator);
+    }
+
+
+
+    /**
+     * @param string $condition
+     * @return SQLQueryBuilder
+    */
+    public function andWhere(string $condition): SQLQueryBuilder
+    {
+        return $this->where($condition, "AND");
+    }
+
+
+    /**
+     * @param string $condition
+     * @return SQLQueryBuilder
+    */
+    public function orWhere(string $condition): SQLQueryBuilder
+    {
+        return $this->where($condition, "OR");
+    }
+
+
+    /**
+     * @param int $start
+     * @param int $offset
+     * @return SQLQueryBuilder
+     * @throws \Exception
+    */
+    public function limit(int $start, int $offset): SQLQueryBuilder
+    {
+         return $this->addSql(new LimitType($start, $offset));
+    }
+
+
+    /**
+     * @param string|array $column
+     * @param string $sort
+     * @return SQLQueryBuilder
+     * @throws \Exception
+    */
+    public function orderBy($column, string $sort='asc'): SQLQueryBuilder
+    {
+        return $this->addSql(new OrderByType($column, $sort));
+    }
+
+
+    /**
+     * @param string $table
+     * @param string $condition
+     * @param string $type
+     * @return SQLQueryBuilder
+     * @throws \Exception
+    */
+    public function join(string $table, string $condition, string $type = ''): SQLQueryBuilder
+    {
+        return $this->addSql(new JoinType($table, $condition, $type));
+    }
+
+
+    /**
+     * @param array $attributes
+     * @return SQLQueryBuilder
+     * @throws \Exception
+    */
+    public function insert(array $attributes): SQLQueryBuilder
+    {
+          return $this->addSql(new InsertType($attributes));
+    }
+
+
+    /**
+     * @param array $attributes
+     * @return SQLQueryBuilder
+     * @throws \Exception
+    */
+    public function update(array $attributes): SQLQueryBuilder
+    {
+        return $this->addSql(new UpdateType($attributes));
+    }
+
+
+
+    /**
+     * @param string $table
+     * @return SQLQueryBuilder
+     * @throws \Exception
+    */
+    public function delete(string $table): SQLQueryBuilder
+    {
+        return $this->addSql(new DeleteType($table));
+    }
+
+
+
+    /**
+     * @param $key
+     * @param $value
+     * @return SQLQueryBuilder
+    */
+    public function setParameter($key, $value): SQLQueryBuilder
+    {
+        $this->parameters[$key] = $value;
+
+        return $this;
+    }
+
+
+    /**
+     * @param array $parameters
+     * @return SQLQueryBuilder
+    */
+    public function setParameters(array $parameters): SQLQueryBuilder
+    {
+        foreach ($parameters as $key => $value)
+        {
+            $this->setParameter($key, $value);
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * @return array
+    */
+    public function getValues(): array
+    {
+         return array_values($this->parameters);
+    }
+
+
+    /**
+     * @return string
+    */
+    public function getSQL(): string
+    {
+         $start = '';
+         $sql   = [];
+
+         foreach ($this->sql as $key => $query)
+         {
+              if(\in_array($key, ['select', 'update', 'insert']))
+              {
+                   $start = $query . ' ';
+              }
+
+              if($key == 'where')
+              {
+                  $sql[] = implode(' ', $query);
+              }
+
+              if(! \in_array($key, ['select', 'update', 'insert', 'where']))
+              {
+                  $sql[] = $query;
+              }
+         }
+
+         return  $start . join(' ', $sql);
+    }
+
+
+    /**
+     * @return array
+    */
+    public function getSQLParts()
+    {
+        return array_values($this->sql);
+    }
+
+
+
+    /**
+     * @return mixed|void
+    */
+    public function flush()
+    {
+        $this->sql   = [];
+        $this->types   = [];
+        $this->parameters = [];
+    }
+
+
+    /**
+     * @param SqlType $sqlType
+     * @return AbstractQueryBuilder
+     * @throws \Exception
+    */
+    public function addSql(SqlType $sqlType): AbstractQueryBuilder
+    {
+        $name = $sqlType->getName();
+
+        if(\array_key_exists($name, $this->sql))
+        {
+             throw new \Exception('name ('. $name .') already taken!');
+        }
+
+        if(true === $sqlType->resetPreviousSQL()) {
+            $this->flush();
+        }
+
+        if($this->table)
+        {
+            $sqlType->setTable($this->table);
+        }
+
+        if($this->alias)
+        {
+            $sqlType->setAlias($this->alias);
+        }
+
+        $this->types[] = $sqlType;
+
+        $this->sql[$name] = $sqlType->build();
+
+        return $this;
+    }
+
+
+    /**
+     * @param WhereType $whereType
+     * @return AbstractQueryBuilder
+    */
+    protected function addWhereSQL($condition, $operator = ''): AbstractQueryBuilder
+    {
+         $whereType = new WhereType($condition, $operator);
+
+         $this->sql[$whereType->getName()][] = $whereType->build();
+
+         return $this;
+    }
+
+
+
+    /**
+     * @param $name
+     * @return SqlType
+     * @throws \Exception
+    */
+    protected function retrieveSQL($name): SqlType
+    {
+         if(! $this->sql[$name])
+         {
+              throw new \Exception('Unavailable name ('. $name .') SQL.');
+         }
+
+         return $this->sql[$name];
+    }
+}

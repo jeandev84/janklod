@@ -1,0 +1,141 @@
+<?php
+namespace Jan\Component\Form;
+
+
+use Jan\Component\Form\Contract\FormInterface;
+use Jan\Component\Form\Type\Support\Type;
+use Jan\Component\Http\Request;
+
+
+/**
+ * Class Form
+ * @package Jan\Component\Form
+*/
+class Form implements FormInterface
+{
+
+      /**
+       * @var array
+      */
+      protected $items = [];
+
+
+      /**
+       * Form constructor.
+      */
+      public function __construct()
+      {
+          // $this->createType(FormStartType::class);
+      }
+
+//
+//      /**
+//        * @param array $options
+//        * @return Form
+//      */
+//      public function open(array $options = []): Form
+//      {
+//            $attrs = [];
+//
+//            if(! $this->started)
+//            {
+//                $attrs = [
+//                  'method' => 'GET',
+//                  'action' => '/',
+//                  'attr'   => $options
+//                ];
+//
+//                $this->types[] = new FormStartType('', $attrs);
+//                $this->started = true;
+//            }
+//
+//            return $this;
+//      }
+
+//
+//      /**
+//       * close form
+//      */
+//      public function close()
+//      {
+//           if($this->started)
+//           {
+//               $this->types[] = "</form>";
+//
+//               $this->started = false;
+//           }
+//      }
+
+
+       /**
+        * @param string $child
+        * @param string|null $type
+        * @param array $options
+        * @return $this
+       */
+       public function add(string $child, string $type = null, array $options = []): Form
+       {
+            $this->items[$child] = [$this->createType($type, $child, $options), $options];
+
+            return $this;
+       }
+
+
+       /**
+        * @param Request $request
+       */
+       public function handleRequest(Request $request)
+       {
+
+       }
+
+
+       /**
+        * @return array
+       */
+       public function getItems(): array
+       {
+           return $this->items;
+       }
+
+
+       /**
+        * Create a view form
+       */
+       public function createView(): string
+       {
+          $html = [];
+
+         foreach ($this->getItems() as $formType)
+         {
+             list($type, $options) = $formType;
+
+             if($type instanceof Type)
+             {
+                 $html[] = $type->buildHtml();
+             }
+         }
+
+         return join("\n", $html);
+      }
+
+
+
+     /**
+      * @param string|null $type
+      * @param string $child
+      * @param array $options
+      * @return Type|null
+     */
+     protected function createType(?string $type, string $child, array $options = []): ?Type
+     {
+         if(is_null($type))
+         {
+             return null;
+         }
+
+         $type = new $type($child, $options);
+
+         return $type instanceof Type ? $type : null;
+     }
+}

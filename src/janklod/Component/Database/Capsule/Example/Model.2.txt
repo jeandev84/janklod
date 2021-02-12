@@ -1,0 +1,213 @@
+<?php
+namespace Jan\Component\Database\Capsule\ORM;
+
+
+use Exception;
+use Jan\Component\Database\Capsule\Exception\AccessMethodException;
+use Jan\Component\Database\Capsule\Query;
+use ReflectionException;
+use Jan\Component\Database\EntityTrait;
+
+
+/**
+ * Class Model
+ *
+ * @package Jan\Component\Database\Capsule\ORM
+*/
+class Model
+{
+
+    use EntityTrait;
+
+
+    /**
+     * @var Model
+    */
+    private static $accessibleMethods = [
+        'select',
+        'find',
+        'findAll',
+        'where',
+        'delete',
+        'create',
+        'columns'
+    ];
+
+
+
+    /**
+     * @var string
+    */
+    protected $table;
+
+
+
+    /**
+     * @var string
+    */
+    protected $primaryKey = 'id';
+
+
+
+    /**
+     * @var array
+    */
+    protected $attributes = [];
+
+
+    /**
+     * @var array
+    */
+    protected $fillable = [];
+
+
+
+    /**
+     * @var string[]
+    */
+    protected $guarded = ['id'];
+
+
+    /**
+     * @var array
+     */
+    protected $hidden  = [];
+
+
+
+    /**
+     * @param $column
+     * @param $value
+    */
+    public function setAttribute($column, $value)
+    {
+        $this->attributes[$column] = $value;
+    }
+
+
+
+    /**
+     * @param $column
+     * @return bool
+     */
+    public function hasAttribute($column): bool
+    {
+        return isset($this->attributes[$column]);
+    }
+
+
+    /**
+     * @param $column
+     * @return mixed
+     * @throws Exception
+    */
+    public function getAttribute($column)
+    {
+        if(! $this->hasAttribute($column))
+        {
+            throw new Exception('Invalid column name : ('. $column .')');
+        }
+
+        return $this->attributes[$column];
+    }
+
+
+
+    /**
+     * @param $column
+     * @param $value
+    */
+    public function __set($column, $value)
+    {
+        $this->setAttribute($column, $value);
+    }
+
+
+    /**
+     * @param $column
+     * @return mixed
+     * @throws Exception
+    */
+    public function __get($column)
+    {
+        return $this->getAttribute($column);
+    }
+
+
+
+    /**
+     * store data to the database
+     *
+     * action insert|update
+    */
+    public function save()
+    {
+         dump($this->attributes);
+         //unset($this->attributes['username']);
+         array_shift($this->attributes);
+         dump($this->attributes);
+    }
+
+
+    /**
+     * @param $method
+     * @param $arguments
+     * @return mixed
+     * @throws Exception
+    */
+    public static function __callStatic($method, $arguments)
+    {
+        $repository = (new static())->getRepository();
+
+        if (! static::hasAccessStatic($method))
+        {
+            throw new AccessMethodException('class ('. get_called_class() .') cannot access to method : ('. $method . ')');
+        }
+
+        if(method_exists($repository, $method))
+        {
+            return call_user_func_array([$repository, $method], $arguments);
+        }
+    }
+
+
+
+
+    /**
+     * @return string
+     * @throws ReflectionException
+    */
+    public function getTable(): string
+    {
+         if(! $this->table) {
+             $this->table = $this->getTableDefaultName(get_called_class());
+         }
+
+         return $this->table;
+    }
+
+
+    /**
+     * @param $method
+     * @return bool
+    */
+    protected static function hasAccessStatic($method): bool
+    {
+        return \in_array($method, self::$accessibleMethods);
+    }
+
+
+    /**
+     * @return Query
+     * @throws ReflectionException
+    */
+    protected function getRepository()
+    {
+        $repository = new Query();
+        $repository->setPrimaryKey($this->primaryKey);
+        $repository->setEntityClass(get_called_class());
+        $repository->setTable($this->getTable());
+
+        return $repository;
+    }
+}

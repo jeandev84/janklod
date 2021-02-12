@@ -1,0 +1,283 @@
+<?php
+
+
+namespace Jan\Component\Database\ORM\Builder;
+
+
+use Jan\Component\Database\ORM\Builder\Type\DeleteType;
+use Jan\Component\Database\ORM\Builder\Type\FromType;
+use Jan\Component\Database\ORM\Builder\Type\JoinType;
+use Jan\Component\Database\ORM\Builder\Type\LimitType;
+use Jan\Component\Database\ORM\Builder\Type\OrderByType;
+use Jan\Component\Database\ORM\Builder\Type\SelectType;
+use Jan\Component\Database\ORM\Builder\Type\Support\SqlType;
+use Jan\Component\Database\ORM\Builder\Type\UpdateType;
+
+class QueryBuilder
+{
+
+    /**
+     * @var string
+     */
+    protected $table;
+
+
+
+    /**
+     * @var string
+     */
+    protected $alias;
+
+
+
+    /**
+     * @var array
+     */
+    protected $sql = [];
+
+
+
+    /**
+     * @var array
+     */
+    protected $values = [];
+
+
+
+    /**
+     * @var array
+     */
+    protected $selects = [];
+
+
+    /**
+     * @var array
+     */
+    protected $updates = [];
+
+
+    /**
+     * @var array
+     */
+    protected $wheres = [];
+
+
+    /**
+     * @var array
+    */
+    protected $inserts = [];
+
+
+
+    /**
+     * @param string $table
+     * @param string $alias
+     * @return $this
+    */
+    public function table(string $table, string $alias = ''): QueryBuilder
+    {
+        $this->table = $table;
+        $this->alias = $alias;
+
+        return $this;
+    }
+
+
+    /**
+     * @return $this
+     */
+    public function select(): QueryBuilder
+    {
+        return $this->addSql(
+            new SelectType(func_get_args())
+        );
+    }
+
+
+    /**
+     * @return $this
+     */
+    public function addSelect(): QueryBuilder
+    {
+        return $this;
+    }
+
+
+
+    /**
+     * @param string $table
+     * @param string $alias
+     * @return $this
+     */
+    public function from(string $table, string $alias = ''): QueryBuilder
+    {
+        return $this->addSql(new FromType(), $table, $alias);
+    }
+
+
+
+    /**
+     * @param string $column
+     * @param string $sort
+     * @return $this
+     */
+    public function orderBy(string $column, string $sort='asc'): QueryBuilder
+    {
+        return $this->addSql(new OrderByType($column, $sort));
+    }
+
+
+    /**
+     * @param string $column
+     * @return $this
+     */
+    public function orderByDesc(string $column): QueryBuilder
+    {
+        return $this->orderBy($column, 'desc');
+    }
+
+
+    /**
+     * @param string $column
+     * @param string $condition
+     * @param string $join
+     * @return $this
+     */
+    public function join(string $column, string $condition, string $join = ''): QueryBuilder
+    {
+        return $this->addSql(
+            new JoinType()
+        );
+    }
+
+
+    /**
+     * @param string $start
+     * @param string $offset
+     * @return $this
+     */
+    public function limit(string $start, string $offset): QueryBuilder
+    {
+        return $this->addSql(
+            new LimitType()
+        );
+    }
+
+
+    /**
+     * @param string $column
+     * @param $value
+     * @param string $operator
+     * @return $this
+     */
+    public function where(string $column, $value, string $operator = "="): QueryBuilder
+    {
+        return $this;
+    }
+
+
+    /**
+     * @param array $columns
+     * @param string $table
+     */
+    public function insert(array $columns, string $table = '')
+    {
+        dump($columns);
+    }
+
+
+
+    /**
+     * @param array $columns
+     * @param string $table
+     * @return $this
+     */
+    public function update(array $columns, string $table = ''): QueryBuilder
+    {
+        $this->addValues(array_values($columns));
+
+        return $this->addSql(
+            new UpdateType(array_keys($columns)),
+            $table
+        );
+    }
+
+
+
+    /**
+     * @param string $table
+     * @return $this
+    */
+    public function delete(string $table): QueryBuilder
+    {
+        return $this->addSql(new DeleteType(), $table);
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getSQL(): string
+    {
+        return join(' ', $this->sql);
+    }
+
+
+    /**
+     * @param SqlType $sqlBuilder
+     * @param string $table
+     * @param string $alias
+     * @return $this
+    */
+    public function addSql(SqlType $sqlBuilder, string $table = '', string $alias = ''): QueryBuilder
+    {
+        if($sqlBuilder->isNewSQL()) {
+            $this->flush();
+        }
+
+        if($table) {
+            $this->table = $table;
+        }
+
+        if($alias) {
+            $this->alias = $alias;
+        }
+
+        $sqlBuilder->table($this->table, $this->alias);
+
+        $this->sql[] = $sqlBuilder->build();
+
+        return $this;
+    }
+
+
+
+    /**
+     * @param $values
+     */
+    public function addValues($values)
+    {
+        $this->values[] = $values;
+    }
+
+
+
+    /**
+     * @return array
+     */
+    public function getValues(): array
+    {
+        return $this->values;
+    }
+
+
+
+    /**
+     * flush query params
+     */
+    public function flush()
+    {
+        $this->sql = [];
+        $this->values = [];
+    }
+}

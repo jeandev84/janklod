@@ -1,0 +1,57 @@
+<?php
+namespace App\Http\Controllers;
+
+
+
+use App\Entity\Address;
+
+/**
+ * Class PageController
+ * @package App\Http\Controllers
+*/
+class PageController
+{
+
+
+    /**
+     * PageController constructor.
+     * @param Address $address
+     * @param int $id
+     * @param string $slug
+    */
+    public function __construct(Address $address, $id = 1, $slug = 'ddddd')
+    {
+        echo __CLASS__.'::constructor<br>';
+    }
+
+
+    /**
+     * Action index
+     *
+     * @param Address $address
+     * @param int $id
+     * @param int $slug
+     */
+     public function index(Address $address, $id = 1, $slug = 2)
+     {
+
+     }
+
+
+     /**
+      * Action about
+     */
+     public function about()
+     {
+
+     }
+
+
+     /**
+      * Action contact
+     */
+     public function contact()
+     {
+
+     }
+}

@@ -1,0 +1,258 @@
+<?php
+namespace Jan\Component\Database\ORM;
+
+
+use Jan\Component\Database\Connection\PDO\PDOConnection;
+use Jan\Component\Database\ConnectorTrait;
+use Jan\Component\Database\Contract\ManagerInterface;
+use Jan\Component\Database\Contract\QueryInterface;
+use Jan\Component\Database\ORM\Builder\QueryBuilder;
+use Jan\Component\Database\ORM\Contract\QueryBuilderInterface;
+
+/**
+ * Class ActiveRecord
+ * @package Jan\Component\Database\ORM
+ */
+class ActiveRecord
+{
+
+    use ConnectorTrait;
+
+
+    /**
+     * @var QueryBuilder
+     */
+    protected $queryBuilder;
+
+
+
+    /**
+     * @var string
+     */
+    protected $entityClass = \stdClass::class;
+
+
+
+    /**
+     * @var string
+    */
+    protected $table;
+
+
+
+    /**
+     * EntityRepository constructor.
+     *
+     * @param ManagerInterface $manager
+    */
+    public function __construct(ManagerInterface $manager, QueryBuilderInterface $queryBuilder = null)
+    {
+        $this->manager = $manager;
+
+        if($queryBuilder === null)
+        {
+            $queryBuilder = new QueryBuilder($manager);
+        }
+
+        $this->queryBuilder = $queryBuilder;
+    }
+
+
+    /**
+     * @param $entityClass
+    */
+    public function setEntityClass($entityClass)
+    {
+        $this->entityClass = $entityClass;
+    }
+
+
+    /**
+     * @param $table
+     * @return ActiveRecord
+    */
+    public function table($table)
+    {
+         $this->table = $table;
+
+         return $this;
+    }
+
+
+
+    /**
+     * return []
+    */
+    public function findAll()
+    {
+        $data = [
+            'Product1',
+            'Product2',
+            'Product3',
+        ];
+
+        dump($data);
+    }
+
+
+    /**
+     * @param $criteria
+     * @return array
+     */
+    public function find($id)
+    {
+        dump($id);
+    }
+
+
+
+    /**
+     * @param $column
+     * @param $value
+     * @param string $operator
+    */
+    public function where($column, $value, $operator = "=")
+    {
+        dd($column, $value, $operator);
+    }
+
+
+    /**
+     * @param array $columns
+    */
+    public function insert(array $columns)
+    {
+        $this->queryBuilder->insert($columns);
+    }
+
+
+    /**
+     * @param int $id
+     * @param array $columns
+    */
+    public function update(int $id, array $columns)
+    {
+        $this->queryBuilder->update($id, $columns);
+    }
+
+
+    /**
+     * @param int $id
+     * @param array $columns
+    */
+    public function delete(int $id, array $columns = [])
+    {
+        $this->queryBuilder->delete($id, $columns);
+    }
+
+
+
+    /**
+     * Get all
+    */
+    public function get()
+    {
+
+    }
+
+
+    /**
+     * Get one record
+    */
+    public function one()
+    {
+
+    }
+
+
+    /**
+     * Get first record
+    */
+    public function first()
+    {
+
+    }
+
+
+
+
+    /**
+     * @param $alias
+     * @return QueryBuilder
+     * @throws \Exception
+    */
+    public function getQueryBuilder(): QueryBuilder
+    {
+        $this->queryBuilder->setTable($this->getTable());
+        return $this->queryBuilder;
+    }
+
+
+    /**
+     * @param string $sql
+     * @param array $params
+     * @return mixed
+    */
+    protected function execute(string $sql, array $params = []): QueryInterface
+    {
+        $connection = $this->manager->getConnection();
+
+        if($connection instanceof PDOConnection)
+        {
+            if(! $params)
+            {
+                return $connection->exec($sql);
+            }
+
+            return $connection->query($sql, $params, $this->entityClass)
+                              ->execute();
+        }
+
+        return $connection->exec($sql);
+    }
+
+
+
+    /**
+     * @return string
+     * @throws \Exception
+    */
+    protected function getTable()
+    {
+        if($this->table)
+        {
+            return $this->getTableWithPrefix($this->table);
+        }
+
+        return $this->getTableDefaultName();
+    }
+
+
+    /**
+     * @return string
+     * @throws \ReflectionException
+    */
+    protected function getTableDefaultName()
+    {
+        try {
+
+            $tableName = (new \ReflectionClass($this->entityClass))->getShortName().'s';
+            return $this->getTableWithPrefix(mb_strtolower($tableName));
+
+        } catch (\ReflectionException $e) {
+
+            throw $e;
+        }
+    }
+
+
+
+    /**
+     * @param $table
+     * @return string
+    */
+    protected function getTableWithPrefix($table): string
+    {
+        return $this->getPrefixTable() . $table;
+    }
+}

@@ -1,0 +1,180 @@
+<?php
+namespace Jan\Component\Console\Input;
+
+
+use Jan\Component\Console\Exception\LogicException;
+use Jan\Component\Console\Input\Support\Input;
+
+
+/**
+ * Class ArgvInput
+ * @package Jan\Component\Console\Input
+*/
+class ArgvInput extends Input
+{
+
+        /**
+          * @var array|mixed
+        */
+        protected $parseArgv;
+
+
+        /**
+         * InputArgv constructor.
+         *
+         * @param array $parseArgv
+         * @throws LogicException
+       */
+       public function __construct(array $parseArgv = [])
+       {
+            if(! $parseArgv)
+            {
+                $parseArgv = $_SERVER['argv'] ?? [];
+            }
+
+            array_shift($parseArgv);
+
+            $this->parseArgv = $parseArgv;
+
+            parent::__construct();
+       }
+
+
+       /**
+        * Set parses
+        *
+        * @param array $parseArgv
+       */
+       protected function setParses(array $parseArgv)
+       {
+             $this->parseArgv = $parseArgv;
+       }
+
+
+       /**
+        * Parse arguments and options
+       */
+       protected function parse()
+       {
+           $arguments = [];
+           $options   = [];
+           $longOptions   = [];
+           $shortOptions  = [];
+
+           // php console make:addition a0 -a1=2 -b1=4 -h --table=users --depth
+           // php console make:addition a0 -a1=2 -b1=4 -h --table=users --depth
+           foreach ($this->parseArgv as $item)
+           {
+              if(preg_match('/^-(\w+)=(.*)$/', $item, $matches))
+              {
+                     if(! empty($matches))
+                     {
+                         $argumentName = $matches[1];
+                         $argumentValue = $matches[2];
+                         $arguments[$argumentName] = $argumentValue;
+                     }
+              }
+
+              if(preg_match('/^--(\w+)=(.*)$/', $item, $matches))
+              {
+                   if(! empty($matches))
+                   {
+                       $optionName = $matches[1];
+                       $optionValue = $matches[2];
+                       $options[$optionName] = $optionValue;
+                   }
+               }
+
+               $arguments[] = $item;
+           }
+
+
+           dump($arguments);
+           dd($options);
+       }
+
+
+       /*
+       protected function parseOld()
+       {
+            $parses = $this->parseArgv;
+            $token = array_shift($parses);
+
+            while ($token !== null)
+            {
+                if($token == '')
+                {
+                    dd('Empty token parse argument: '. $token);
+                    $this->parseArgument($token);
+
+                } else if(strpos($token, '--') !== false) {
+
+                    dd('Parse long action: '. $token);
+                    $this->parseLongOption($token);
+
+                } else if(strpos($token, '-') !== false) {
+
+                    dd('Parse short action: '. $token);
+                    $this->parseShortOption($token);
+
+                } else{
+
+                    dd('Parse argument: '. $token);
+                    $this->parseArgument($token);
+                }
+            }
+      }
+      */
+
+
+
+      /**
+        * @param string $token
+       */
+       protected function parseArgument(string $token)
+       {
+            $tokens = explode('=', $token);
+
+            dd('Parse argument: '. $token);
+       }
+
+
+      /**
+       * @param string $token
+      */
+      protected function parseLongOption(string $token)
+      {
+            dd('Long option: '. $token);
+      }
+
+
+      /**
+      * @param string $token
+      */
+      protected function parseShortOption(string $token)
+      {
+           dd("Short Option: ". $token);
+      }
+
+
+      /**
+       * Get first argument
+       *
+       * @return string
+      */
+      public function getFirstArgument()
+      {
+         return $this->getToken(0);
+      }
+
+
+     /**
+      * @param $index
+      * @param string $default
+      * @return mixed|string
+     */
+     protected function getToken($index, $default = '')
+     {
+         return $this->parseArgv[$index] ?? $default;
+     }
+}

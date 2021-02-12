@@ -1,0 +1,303 @@
+<?php
+namespace Jan\Component\Database;
+
+
+use Jan\Component\Database\Connection\PDO\PDOConnection;
+use Jan\Component\Database\Contract\ConnectionInterface;
+use Jan\Component\Database\Contract\EntityManagerInterface;
+use Jan\Component\Database\Contract\ManagerInterface;
+use Jan\Component\Database\Contract\QueryInterface;
+use Jan\Component\Database\ORM\Builder\Builder;
+use PDO;
+
+
+/**
+ * Class DatabaseManager
+ * @package Jan\Component\Database
+*/
+class DatabaseManager implements ManagerInterface
+{
+
+     /**
+      * @var ConnectionFactory
+     */
+     protected $factory;
+
+
+     /**
+      * @var mixed
+     */
+     protected $connection;
+
+
+     /**
+      * @var Configuration
+     */
+     protected $config;
+
+
+
+     /**
+      * @var EntityManagerInterface
+     */
+     protected $entityManager;
+
+
+
+     /**
+      * @var bool
+     */
+     protected $status = false;
+
+
+
+     /**
+      * DatabaseManager constructor.
+      *
+      * @param array $configParams
+      * @throws \Exception
+     */
+     public function __construct(array $configParams = [])
+     {
+          if($configParams)
+          {
+              $this->open($configParams);
+          }
+     }
+
+
+
+     /**
+      * @param array $configParams
+      * @throws \Exception
+     */
+     public function open(array $configParams)
+     {
+          if(! $this->connection)
+          {
+              $config  = new Configuration($configParams);
+              $factory = new ConnectionFactory($config);
+
+              $this->setConfiguration($config);
+              $this->setConnection($factory->make());
+              $this->setFactory($factory);
+          }
+     }
+
+
+
+     /**
+      * @param Configuration $config
+      * @return mixed|void
+     */
+     public function setConfiguration(Configuration $config)
+     {
+          $this->config = $config;
+     }
+
+
+
+     /**
+      * @param $connection
+      * @return mixed|void
+     */
+     public function setConnection(ConnectionInterface $connection)
+     {
+           $this->connection = $connection;
+     }
+
+
+     /**
+      * @return bool
+     */
+     public function isConnected()
+     {
+         return $this->connection instanceof ConnectionInterface;
+     }
+
+
+
+     /**
+      * @param string $key
+      * @return Configuration|null
+     */
+     public function config(string $key): ?Configuration
+     {
+          return $this->config->get($key);
+     }
+
+
+     /**
+      * @return PDOConnection
+     */
+     public function getPDO()
+     {
+         return $this->getFactory()->getPDO();
+     }
+
+
+     /**
+      * @return PDO
+     */
+     public function pdo(): PDO
+     {
+         return $this->getPDO()->getConnection();
+     }
+
+
+     /**
+      * @return Connection\MySQLi\MySQLiConnection
+     */
+     public function getMySQLi()
+     {
+         return $this->getFactory()->getMySQLi();
+     }
+
+
+
+     /**
+      * @return mysqli
+     */
+     public function mysqli(): mysqli
+     {
+         return $this->getMySQLi()->getConnection();
+     }
+
+
+     /**
+      * @param string $driverName
+      * @return ConnectionInterface
+      * @throws \Exception
+     */
+     public function connection($driverName = ''): ConnectionInterface
+     {
+         if(! $driverName)
+         {
+             return $this->getConnection();
+         }
+
+         return $this->connection = $this->getFactory()->make($driverName);
+     }
+
+
+
+     /**
+      * @return mixed
+     */
+     public function getConnection(): ConnectionInterface
+     {
+         return $this->connection;
+     }
+
+
+     /**
+      * @return Configuration
+     */
+     public function getConfiguration(): Configuration
+     {
+         return $this->config;
+     }
+
+
+     /**
+      * @param EntityManagerInterface $entityManager
+     */
+     public function setManager(EntityManagerInterface $entityManager)
+     {
+           $this->entityManager = $entityManager;
+     }
+
+
+     /**
+      * @return EntityManagerInterface
+     */
+     public function getManager(): EntityManagerInterface
+     {
+         return $this->entityManager;
+     }
+
+
+
+     /**
+      * @param $table
+      * @return Builder
+     */
+     public function table($table = '')
+     {
+         /*
+         $queryBuilder = new QueryBuilder($this);
+         $table = $this->config->getTableName($table);
+         $queryBuilder->table($table);
+         return $queryBuilder;
+         */
+     }
+
+
+     /**
+      * @param string $sql
+      * @param array $params
+      * @param string|null $entityClass
+      * @return QueryInterface|null
+      * @throws \Exception
+     */
+     public function query(string $sql, array $params = [], string $entityClass = null)
+     {
+         return $this->getFactory()->query($sql, $params, $entityClass);
+     }
+
+
+
+     /**
+      * @param $sql
+      * @return mixed
+     */
+     public function exec($sql)
+     {
+         return $this->getConnection()->exec($sql);
+     }
+
+
+
+     /**
+      * Close connection to database
+      *
+      * @return void
+     */
+     public function close()
+     {
+         if($this->connection)
+         {
+             $this->getConnection()->close();
+         }
+     }
+
+
+
+     /**
+      * @return mixed|void
+     */
+     public function flush()
+     {
+          // close connection
+          $this->close();
+     }
+
+
+     /**
+      * @param ConnectionFactory $factory
+     */
+     protected function setFactory(ConnectionFactory $factory)
+     {
+         $this->factory = $factory;
+     }
+
+
+     /**
+      * @return ConnectionFactory
+     */
+     protected function getFactory(): ConnectionFactory
+     {
+         return $this->factory;
+     }
+
+}

@@ -1,0 +1,12 @@
+<?php
+namespace Jan\Component\Database\ORM\Builder;
+
+
+/**
+ * Class PgsqlQueryBuilder
+ * @package Jan\Component\Database\ORM\Builder
+*/
+class PgsqlQueryBuilder
+{
+
+}

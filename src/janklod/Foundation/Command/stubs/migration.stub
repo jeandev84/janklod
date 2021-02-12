@@ -1,0 +1,38 @@
+<?php
+namespace App\Migrations;
+
+
+use Jan\Component\Database\Migration\Migration;
+use Jan\Foundation\Facade\Database\Schema;
+use Jan\Component\Database\Schema\BluePrint;
+
+
+/**
+ * Class MigrationClass
+ *
+ * @package Jan\Component\Database\Migration
+*/
+class MigrationClass extends Migration
+{
+
+    /**
+     * @return void
+    */
+    public function up()
+    {
+        // table users
+        Schema::create('tableName', function (BluePrint $table) {
+            $table->increments('id');
+            // ...
+        });
+    }
+
+
+    /**
+     * @return void
+    */
+    public function down()
+    {
+        Schema::dropIfExists('tableName');
+    }
+}

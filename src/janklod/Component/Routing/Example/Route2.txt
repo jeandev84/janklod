@@ -1,0 +1,643 @@
+<?php
+namespace Jan\Component\Routing;
+
+
+
+/**
+ * Class Route
+ * @package Jan\Component\Routing
+*/
+class Route
+{
+
+      /**
+       * route path
+       *
+       * @var string
+      */
+      protected $path;
+
+
+      /**
+       * route handle
+       *
+       * @var mixed
+      */
+      protected $target;
+
+
+      /**
+       * route name
+       *
+       * @var string
+      */
+      protected $name;
+
+
+      /**
+       * route name prefix
+       *
+       * @var string
+      */
+      protected $namePrefix;
+
+
+      /**
+       * route params
+       *
+       * @var array
+      */
+      protected $patterns  = [];
+
+
+      /**
+       * methods using by route
+       *
+       * @var array
+      */
+      protected $methods = [];
+
+
+
+      /**
+       * route matches params
+       *
+       * @var array
+      */
+      protected $matches = [];
+
+
+      /**
+       * route middleware
+       *
+       * @var array
+      */
+      protected $middleware = [];
+
+
+      /**
+       * route options
+       *
+       * @var array
+      */
+      protected $options = [];
+
+
+      /**
+       * @var array
+      */
+      protected static $namedRoutes = [];
+
+
+      /**
+       * Route constructor.
+       *
+       * @param array $methods
+       * @param string $path
+       * @param null $target
+      */
+      public function __construct(array $methods = [], string $path = '', $target = null)
+      {
+            $this->setMethods($methods);
+            $this->setPath($path);
+            $this->setTarget($target);
+      }
+
+
+      /**
+       * get route path
+       *
+       * @return string
+      */
+      public function getPath(): string
+      {
+          return $this->path;
+      }
+
+
+      /**
+       * set route path
+       *
+       * @param string $path
+       * @return Route
+      */
+      public function setPath(string $path): Route
+      {
+           $this->path = $path;
+
+           return $this;
+      }
+
+
+      /**
+       * get route target
+       *
+       * @return mixed
+      */
+      public function getTarget()
+      {
+          return $this->target;
+      }
+
+
+      /**
+       * set route target
+       *
+       * @param mixed $target
+       * @return Route
+      */
+      public function setTarget($target): Route
+      {
+          $this->target = $target;
+
+          return $this;
+      }
+
+
+      /**
+       * @return string
+      */
+      public function getNamePrefix(): string
+      {
+           return $this->namePrefix;
+      }
+
+
+      /**
+       * @param string $namePrefix
+       * @return Route
+      */
+      public function namePrefix(string $namePrefix): Route
+      {
+           $this->namePrefix = $namePrefix;
+
+           return $this;
+      }
+
+
+
+      /**
+       * @return string
+      */
+      public function getName(): string
+      {
+          return $this->name;
+      }
+
+
+      /**
+       * set route name
+       *
+       * @param string|null $name
+       * @return Route
+      */
+      public function name(?string $name): Route
+      {
+          $name = $this->namePrefix. $name;
+
+          if(static::exists($name))
+          {
+              throw new \RuntimeException(
+                  sprintf('This route name (%s) already taken!', $name)
+              );
+          }
+
+          static::$namedRoutes[$name] = $this;
+
+          $this->name = $name;
+
+          return $this;
+      }
+
+
+
+
+      /**
+       * @param $name
+       * @return bool
+      */
+      public static function exists($name): bool
+      {
+          return \array_key_exists($name, static::$namedRoutes);
+      }
+
+
+      /**
+        * @param $name
+        * @return Route
+      */
+      public static function retrieve($name): Route
+      {
+          return static::$namedRoutes[$name];
+      }
+
+
+      /**
+       * @param $name
+       * @param array $params
+       * @return false|string|string[]|null
+      */
+      public static function generate($name, $params = [])
+      {
+           if(! static::exists($name))
+           {
+                return false;
+           }
+
+           return static::retrieve($name)->convertParams($params);
+      }
+
+
+
+      /**
+       * get route params
+       *
+       * @return array
+      */
+      public function getPatterns(): array
+      {
+           return $this->patterns;
+      }
+
+
+     /**
+      * set params
+      * @param $name
+      * @param $regex
+      * @return $this
+     */
+     public function where($name, $regex = null): Route
+     {
+         foreach ($this->parseWhere($name, $regex) as $name => $regex)
+         {
+              $this->patterns[$name] = $this->resolvePattern($regex);
+         }
+
+         return $this;
+     }
+
+
+     /**
+      * @param $name
+      * @return $this
+     */
+     public function whereNumeric($name): Route
+     {
+        return $this->where($name, '[0-9]+'); // (\d+)
+     }
+
+
+     /**
+      * @param $name
+      * @return Route
+     */
+     public function any($name): Route
+     {
+         return $this->where($name, '.*');
+     }
+
+
+     /**
+      * @param $name
+      * @return Route
+     */
+     public function whereAlphaNumeric($name): Route
+     {
+         return $this->where($name, '[a-z\-0-9]+'); // (\w+)
+     }
+
+
+     /**
+      * get route methods
+      *
+      * @return array
+     */
+     public function getMethods(): array
+     {
+         return $this->methods;
+     }
+
+
+     /**
+      * set route methods
+      *
+      * @param array|string $methods
+      * @return Route
+     */
+     public function setMethods($methods): Route
+     {
+         $this->methods = $methods;
+
+         return $this;
+     }
+
+
+
+     /**
+      * get matches params
+      *
+      * @return array
+     */
+     public function getMatches(): array
+     {
+         return $this->matches;
+     }
+
+
+     /**
+      * @param $name
+      * @return mixed
+     */
+     public function getPattern($name): string
+     {
+         return $this->patterns[$name] ?? '';
+     }
+
+
+
+     /**
+      * get route middlewares
+      *
+      * @return array
+     */
+     public function getMiddleware(): array
+     {
+          return $this->middleware;
+     }
+
+
+
+     /**
+      * set middlewares
+      *
+      * @param array $middleware
+      * @return Route
+     */
+     public function middleware(array $middleware): Route
+     {
+        $this->middleware = array_merge($this->middleware, $middleware);
+
+        return $this;
+     }
+
+
+     /**
+      * get options
+      *
+      * @return array
+     */
+     public function getOptions(): array
+     {
+         return $this->options;
+     }
+
+
+     /**
+      * set route options
+      *
+      * @param array $options
+      * @return Route
+     */
+     public function setOptions(array $options): Route
+     {
+         $this->options = array_merge($this->options, $options);
+
+         return $this;
+     }
+
+
+     /**
+      * @param $key
+      * @param $value
+      * @return Route
+     */
+     public function setOption($key, $value): Route
+     {
+          $this->options[$key] = $value;
+
+          return $this;
+     }
+
+
+
+
+    /**
+     * Determine if the given request method is allowed
+     *
+     * @param string $method
+     * @return bool
+    */
+    public function isMatchingMethod(string $method): bool
+    {
+        if(\in_array($method, $this->methods))
+        {
+            $this->setOptions(compact('method'));
+
+            return true;
+        }
+
+        return false;
+
+        /* return \in_array($requestMethod, $this->methods); */
+    }
+
+
+    /**
+     * Determine if the given request uri is matched
+     *
+     * @param string $path
+     * @return bool
+    */
+    public function isMatchingPath(string $path): bool
+    {
+        if(preg_match($pattern = $this->generatePattern(), $this->resolvePath($path), $matches))
+        {
+            $this->matches = $this->filterParams($matches);
+
+            $this->setOptions(compact('pattern', 'path'));
+
+            return true;
+        }
+
+        return false;
+    }
+
+
+    /**
+      * Determine if current request method and uri matches route
+      *
+      * @param $requestMethod
+      * @param $requestUri
+      * @return bool
+    */
+    public function match($requestMethod, $requestUri): bool
+    {
+        return $this->isMatchingMethod($requestMethod) && $this->isMatchingPath($requestUri);
+    }
+
+
+    /**
+     * Call route
+     * @return mixed
+     */
+    public function call()
+    {
+        if(is_callable($this->target))
+        {
+            return call_user_func_array($this->target, array_values($this->matches));
+        }
+    }
+
+
+    /**
+     * Generate pattern
+     *
+     * @param string $flag
+     * @return string
+    */
+    protected function generatePattern(string $flag = 'i'): string
+    {
+        $patterns = [];
+
+        if($this->patterns)
+        {
+            foreach ($this->patterns as $name => $regex)
+            {
+                $patterns[$name] = '(?P<'. $name .'>'. $regex . ')';
+            }
+        }
+
+        $pattern = $this->convertParams($patterns, true);
+
+        return '#^'. $this->removeTrailingSlashes($pattern) .'$#'. $flag;
+    }
+
+
+    /**
+     * @param array $params
+     * @param bool $bound
+     * @return string|string[]|null
+    */
+    protected function convertParams(array $params = [], bool $bound = false)
+    {
+        $path = $this->path;
+
+        if($params)
+        {
+            $replace = [];
+
+            foreach($params as $k => $v)
+            {
+                $patterns   = ["#{{$k}}#", "#{{$k}.?}#"];
+                $replace[]  = $v;
+
+                if($bound === true)
+                {
+                    $replace = array_merge($replace, ['?'. $v .'?']);
+                }
+
+                dump($patterns, $replace);
+                $path = preg_replace($patterns, $replace, $path);
+            }
+        }
+
+        return $path;
+    }
+
+
+    /**
+     * @param array $params
+     * @param bool $bound
+     * @return string|string[]|null
+    */
+    protected function convertParamsOld(array $params = [], bool $bound = false)
+    {
+        $path = $this->path;
+
+        if($params)
+        {
+           // $replace = [];
+
+            foreach($params as $k => $v)
+            {
+                $patterns = ["#{{$k}}#", "#{{$k}.?}#"];
+                $replace  = $v;
+
+                if($bound === true)
+                {
+                    $replace = [$v, '?'. $v .'?'];
+                }
+
+                dump($patterns, $replace);
+                $path = preg_replace($patterns, $replace, $path);
+            }
+        }
+
+        return $path;
+    }
+
+
+
+    /**
+     * @param string $path
+     * @return string
+    */
+    protected function resolvePath(string $path): string
+    {
+        if(stripos($path, '?') !== false)
+        {
+            return $this->removeTrailingSlashes(explode('?', $path)[0]);
+        }
+
+        return $this->removeTrailingSlashes($path);
+    }
+
+
+    /**
+     * @param string $path
+     * @return string
+    */
+    protected function removeTrailingSlashes(string $path): string
+    {
+        return trim($path, '\\/');
+    }
+
+
+    /**
+     * @param array $matches
+     * @return array
+    */
+    protected function filterParams(array $matches): array
+    {
+        return array_filter($matches, function ($key) {
+
+            return ! is_numeric($key);
+
+        }, ARRAY_FILTER_USE_KEY);
+    }
+
+
+
+    /**
+     * Determine parses
+     *
+     * @param $name
+     * @param $regex
+     * @return array
+    */
+    protected function parseWhere($name, $regex): array
+    {
+        return \is_array($name) ? $name : [$name => $regex];
+    }
+
+
+    /**
+     * @param $regex
+     * @return string|string[]
+    */
+    protected function resolvePattern($regex)
+    {
+        return str_replace('(', '(?:', $regex);
+    }
+}
+

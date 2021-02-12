@@ -1,0 +1,124 @@
+<?php
+namespace Jan\Component\Console\Input\Support;
+
+
+use Jan\Component\Console\Input\Contract\InputInterface;
+use Jan\Component\Console\Input\InputBag;
+
+
+/**
+ * Class Input
+ * @package Jan\Component\Console\Input\Support
+*/
+abstract class Input implements InputInterface
+{
+
+       /**
+        * @var array
+       */
+       protected $arguments = [];
+
+
+       /**
+        * @var array
+       */
+       protected $options = [];
+
+
+       /**
+        * @var InputBag
+       */
+       protected $inputBag;
+
+
+       /**
+         * Input constructor.
+         *
+         * @param InputBag $inputBag
+       */
+       public function __construct(InputBag $inputBag)
+       {
+            $this->inputBag  = $inputBag;
+            $this->validate();
+       }
+
+
+       /**
+        * @return string
+       */
+       public function getFirstArgument()
+       {
+           return $this->getToken(0);
+       }
+
+
+       /**
+        * @return array|mixed
+       */
+       public function getTokens()
+       {
+           return $this->tokens;
+       }
+
+
+       /**
+        * @param $index
+        * @param null $default
+        * @return mixed|null
+       */
+       protected function getToken($index, $default = '')
+       {
+           return $this->tokens[$index] ?? $default;
+       }
+
+
+       /**
+        * @return array
+       */
+       public function getArguments()
+       {
+           return $this->arguments;
+       }
+
+
+       /**
+        * @param string $name
+        * @return string|void|null
+       */
+       public function getArgument(string $name)
+       {
+
+       }
+
+
+       /**
+        * @return array
+       */
+       public function getOptions()
+       {
+           return $this->options;
+       }
+
+
+       /**
+        * @param string $name
+        * @return string|void|null
+       */
+       public function getOption(string $name)
+       {
+
+       }
+
+
+       /**
+        * Validate parses params
+        *
+        * @return mixed
+       */
+       public function validate()
+       {
+            // validate parses params
+       }
+
+       abstract protected function parse();
+}

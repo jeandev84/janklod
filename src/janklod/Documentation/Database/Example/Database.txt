@@ -1,0 +1,45 @@
+require_once __DIR__.'/../vendor/autoload.php';
+
+
+$database = new \Jan\Component\Database\DatabaseManager();
+
+$database->open([
+    'driver'    => 'mysql',
+    'database'  => 'janklod',
+    'host'      => '127.0.0.1',
+    'port'      => '3306',
+    'username'  => 'root',
+    'password'  => '',
+    'collation' => 'utf8_unicode_ci',
+    'charset'   => 'utf8',
+    'prefix'    => '',
+    'engine'    => 'InnoDB', // MyISAM
+    'options'   => [],
+]);
+
+
+$query = $database->connection()->query('SELECT * FROM `users` WHERE id = :id', ['id' => 1]);
+
+dump($query);
+
+$database->close();
+
+dump($database->connection());
+
+$database->open([
+    'driver'    => 'mysql',
+    'database'  => 'janklod',
+    'host'      => '127.0.0.1',
+    'port'      => '3306',
+    'username'  => 'root',
+    'password'  => '',
+    'collation' => 'utf8_unicode_ci',
+    'charset'   => 'utf8',
+    'prefix'    => '',
+    'engine'    => 'InnoDB', // MyISAM
+    'options'   => [],
+]);
+
+dd($database->connection());
+$database->connection()->query('SELECT * FROM `users` WHERE id = :id', ['id' => 1]);
+

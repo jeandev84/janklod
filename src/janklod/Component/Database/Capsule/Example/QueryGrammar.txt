@@ -1,0 +1,12 @@
+<?php
+namespace Jan\Component\Database\Eloquent;
+
+
+/**
+ * Class QueryGrammar
+ * @package Jan\Component\Database\Eloquent
+*/
+class QueryGrammar
+{
+
+}

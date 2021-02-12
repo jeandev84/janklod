@@ -1,0 +1,232 @@
+<?php
+namespace Jan\Component\Database\ORM;
+
+
+use Jan\Component\Database\Capsule\Manager;
+use Jan\Component\Database\ORM\Builder\QueryBuilder;
+
+
+/**
+ * Class Model
+ * @package Jan\Component\Database
+*/
+class Model
+{
+
+     /**
+      * @var string
+     */
+     protected $table;
+
+
+     /**
+      * @var string
+     */
+     protected $primaryKey = 'id';
+
+
+
+     /**
+      * @var array
+     */
+     protected $attributes = [];
+
+
+     /**
+      * @var array
+     */
+     protected $fillable = [];
+
+
+
+     /**
+      * @var string[]
+     */
+     protected $guarded = ['id'];
+
+
+     /**
+      * @var array
+     */
+     protected $hidden  = [];
+
+
+
+     /**
+      * @param $column
+      * @param $value
+     */
+     public function setAttribute($column, $value)
+     {
+          $this->attributes[$column] = $value;
+     }
+
+
+     /**
+      * @param $column
+      * @return bool
+     */
+     public function hasAttribute($column)
+     {
+          return isset($this->attributes[$column]);
+     }
+
+
+     /**
+      * @param $column
+      * @return mixed
+      * @throws \Exception
+     */
+     public function getAttribute($column)
+     {
+         if(! $this->hasAttribute($column))
+         {
+              throw new \Exception('Invalid column name : ('. $column .')');
+         }
+
+         return $this->attributes[$column];
+     }
+
+
+
+     /**
+      * @param $column
+      * @param $value
+     */
+     public function __set($column, $value)
+     {
+          $this->setAttribute($column, $value);
+     }
+
+
+     /**
+      * @param $column
+      * @return mixed
+      * @throws \Exception
+     */
+     public function __get($column)
+     {
+         return $this->getAttribute($column);
+     }
+
+
+
+     /**
+      * Store data to the database
+     */
+     public function save()
+     {
+
+     }
+
+
+     /**
+      * @return static
+     */
+     public static function getInstance()
+     {
+         return new static();
+     }
+
+
+
+     /**
+      * @param $method
+      * @param $arguments
+      * @return false|mixed
+      * @throws \Exception
+     */
+     public static function __callStatic($method, $arguments)
+     {
+          $queryBuilder = static::getInstance()->getQueryBuilder();
+
+          if(method_exists($queryBuilder, $method))
+          {
+              return call_user_func_array([$queryBuilder, $method], $arguments);
+          }
+     }
+
+
+     /**
+      * @param $id
+      * @return array
+      * @throws \Exception
+     */
+     public static function find($id)
+     {
+          $qb = self::getInstance()->getQueryBuilder();
+          return $qb->where('id', $id, '=')->one();
+     }
+
+
+     /**
+      * @return array
+      * @throws \Exception
+     */
+     public static function findAll()
+     {
+         $qb = self::getInstance()->getQueryBuilder();
+         $qb->select();
+         $qb->execute(get_called_class());
+     }
+
+
+
+     /**
+      * @throws \Exception
+     */
+     protected function getQueryBuilder()
+     {
+          $queryBuilder = new QueryBuilder(Manager::getInstance());
+          $queryBuilder->table($this->getTable());
+
+          return $queryBuilder;
+     }
+
+
+
+
+    /**
+     * @return string
+     * @throws \Exception
+    */
+    protected function getTable()
+    {
+        if($this->table)
+        {
+            return $this->getTableWithPrefix($this->table);
+        }
+
+        return $this->getTableDefaultName();
+    }
+
+
+    /**
+     * @return string
+     * @throws \ReflectionException
+     */
+    protected function getTableDefaultName()
+    {
+        try {
+
+            $tableName = (new \ReflectionClass(get_called_class()))->getShortName().'s';
+            return $this->getTableWithPrefix(mb_strtolower($tableName));
+
+        } catch (\ReflectionException $e) {
+
+            throw $e;
+        }
+    }
+
+
+    /**
+     * @param $table
+     * @return string
+     * @throws \Exception
+    */
+    protected function getTableWithPrefix($table): string
+    {
+        return Manager::getInstance()->getConfiguration()
+                                     ->getTableName($table);
+    }
+}

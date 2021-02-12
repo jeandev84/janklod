@@ -1,0 +1,56 @@
+<?php
+namespace Jan\Component\Database\Capsule;
+
+
+use Jan\Component\Database\Contract\QueryInterface;
+
+/**
+ * Class Hydrator
+ * @package Jan\Component\Database\Capsule
+*/
+class Hydrator
+{
+
+     /**
+      * @var QueryInterface
+     */
+     protected $queryGrammar;
+
+
+     /**
+      * Hydrator constructor.
+      * @param QueryInterface $queryGrammar
+     */
+     public function __construct(QueryInterface $queryGrammar)
+     {
+          $this->queryGrammar = $queryGrammar;
+     }
+
+
+
+     /**
+      * @return mixed
+     */
+     public function first()
+     {
+        return $this->queryGrammar->getFirstRecord();
+     }
+
+
+     /**
+      * @return mixed
+     */
+     public function one()
+     {
+         return $this->queryGrammar->getOneRecord();
+     }
+
+
+     /**
+      * @return mixed
+     */
+     public function all()
+     {
+         return $this->queryGrammar->getResult();
+     }
+}

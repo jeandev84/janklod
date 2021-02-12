@@ -1,0 +1,48 @@
+<?php
+namespace Jan\Component\Routing;
+
+
+use Jan\Component\Routing\Contract\RouterInterface;
+use Jan\Component\Routing\Contract\UrlGeneratorInterface;
+use Jan\Component\Routing\Traits\UrlGeneratorTrait;
+
+
+/**
+ * Class UrlGenerator
+ * @package Jan\Component\Routing
+*/
+class UrlGenerator implements UrlGeneratorInterface
+{
+
+      use UrlGeneratorTrait;
+
+
+      /**
+       * @var RouterInterface
+      */
+      protected $router;
+
+
+
+      /**
+       * UrlGenerator constructor.
+       * @param string $baseUrl
+      */
+      public function __construct(RouterInterface $router)
+      {
+          $this->router = $router;
+      }
+
+
+
+      /**
+       * @param string $name
+       * @param array $params
+       * @return string
+       * @throws \Exception
+      */
+      public function generate(string $name, array $params = []): string
+      {
+          return $this->router->generate($name, $params);
+      }
+}

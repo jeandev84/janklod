@@ -1,0 +1,204 @@
+<?php
+namespace Jan\Component\Database;
+
+
+use Jan\Component\Database\Contract\ManagerInterface;
+use Jan\Component\Database\Contract\QueryInterface;
+use Jan\Component\Database\ORM\Builder\Builder;
+use Jan\Component\Database\ORM\Contract\QueryBuilderInterface;
+
+
+
+/**
+ * Class Query
+ * @package Jan\Component\Database
+*/
+class Query
+{
+
+
+    /**
+     * @var string
+    */
+    protected $table;
+
+
+
+    /**
+     * @var string
+    */
+    protected $primaryKey = 'id';
+
+
+
+    /**
+     * @var Builder
+     */
+    private $queryBuilder;
+
+
+
+    /**
+     * @var ManagerInterface
+     */
+    protected $manager;
+
+
+
+    /**
+     * @var string
+    */
+    protected $entityClass = \stdClass::class;
+
+
+
+    /**
+     * Query constructor.
+     * @param ManagerInterface $manager
+    */
+    public function __construct(ManagerInterface $manager, QueryBuilderInterface $queryBuilder = null)
+    {
+        $this->manager = $manager;
+
+        if($queryBuilder === null)
+        {
+            $queryBuilder = new Builder($manager);
+        }
+
+        $this->queryBuilder = $queryBuilder;
+    }
+
+
+
+    /**
+     * @param $entityClass
+     * @return Query
+     */
+    public function setEntityClass($entityClass)
+    {
+        $this->entityClass = $entityClass;
+
+        return $this;
+    }
+
+
+    /**
+     * @param $table
+     * @return Builder
+    */
+    public function table($table = '')
+    {
+        $this->queryBuilder->table($this->getTable());
+
+        if($table)
+        {
+            $this->queryBuilder->table($table);
+        }
+
+        return $this->queryBuilder;
+    }
+
+
+    /**
+     * @return Builder|QueryBuilderInterface|null
+    */
+    public function getQueryBuilder()
+    {
+         $this->queryBuilder->table($this->getTable());
+
+         return $this->queryBuilder;
+    }
+
+
+    /**
+     * @param $column
+     * @param $value
+     * @param string $operator
+     * @return Builder|mixed
+    */
+    public function where($column, $value, $operator = "=")
+    {
+         return $this->getQueryBuilder()
+                     ->where($column, $value, $operator);
+    }
+
+    /**
+     * @return mixed
+     * @throws \Exception
+    */
+    public function findAll()
+    {
+        return $this->getQueryBuilder()
+                    ->select()
+                    ->get();
+    }
+
+
+
+    /**
+     * @param $id
+     * @return array|mixed
+     * @throws \Exception
+    */
+    public function find($id)
+    {
+        return $this->getQueryBuilder()
+                    ->where($this->primaryKey, $id)
+                    ->first();
+    }
+
+
+    /**
+     * @param array $columns
+     * @return mixed|void
+    */
+    public function create(array $columns)
+    {
+         return $this->getQueryBuilder()->insert($columns);
+    }
+
+
+    /**
+     * @param int $id
+     * @param array $columns
+     * @return mixed|void
+    */
+    public function update(int $id, array $columns)
+    {
+        return $this->getQueryBuilder()->update($id, $columns);
+    }
+
+
+    /**
+     * @param int $id
+     * @param array $columns
+     * @return mixed|void
+    */
+    public function delete(int $id, array $columns = [])
+    {
+        return $this->getQueryBuilder()->delete($id, $columns);
+    }
+
+
+    /**
+     * @param string $sql
+     * @param array $params
+     * @return mixed
+     * @throws \Exception
+    */
+    public function execute(string $sql, array $params = []): QueryInterface
+    {
+        return $this->manager->query($sql, $params, $this->entityClass);
+    }
+
+
+
+    /**
+     * @return string
+    */
+    public function getTable()
+    {
+        return $this->table;
+    }
+
+}

@@ -1,0 +1,36 @@
+<?php
+namespace Jan\Foundation\Form;
+
+
+use Jan\Component\Form\Type\CsrfTokenType;
+
+
+
+/**
+ * Class FormType
+ * @package Jan\Component\Form
+*/
+class FormType extends BaseType
+{
+
+    /**
+     * @param FormBuilder $builder
+     * @param $options
+    */
+    public function buildForm(FormBuilder $builder, $options)
+    {
+          $builder->add('_token', CsrfTokenType::class, [
+
+          ]);
+    }
+
+
+    /**
+     * @param OptionResolver $resolver
+     * @return mixed
+    */
+    public function setOptions(OptionResolver $resolver)
+    {
+
+    }
+}

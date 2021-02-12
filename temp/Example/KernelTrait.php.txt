@@ -1,0 +1,68 @@
+<?php
+namespace Jan\Foundation;
+
+
+use Jan\Component\Dotenv\Dotenv;
+
+
+/**
+ * Trait KernelTrait
+ * @package Jan\Foundation
+*/
+trait KernelTrait
+{
+
+    /**
+     * @var Application
+    */
+    protected $app;
+
+
+
+    /**
+     * Kernel constructor.
+     * @param Application $app
+     * @throws Exception
+    */
+    public function __construct(Application $app)
+    {
+        $this->app = $app;
+        $this->loadEnvironments();
+        $this->loadHelpers();
+    }
+
+
+    /**
+     * Load Helpers
+    */
+    protected function loadHelpers()
+    {
+        require realpath(__DIR__.'/helpers.php');
+    }
+
+
+    /**
+     * @throws Exception|\Exception
+     */
+    protected function loadEnvironments()
+    {
+        try {
+
+            $dotenv = Dotenv::create($this->app->get('path'));
+
+            $devEnvirons = $dotenv->load('.env.local');
+
+            $environs =  $devEnvirons ?: $dotenv->load('.env');
+
+            /*
+            $env = 'form config(dev/prod)';
+            $env === 'dev' ? $dotenv->load('.env.local') : $dotenv->load('.env');
+            */
+
+        } catch (Exception $e) {
+
+            /* exit($e->getMessage()); */
+            throw $e;
+        }
+    }
+}
