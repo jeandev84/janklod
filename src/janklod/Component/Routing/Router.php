@@ -278,7 +278,7 @@ class Router implements RouterInterface
 
          $routeCallback($this);
 
-         $this->flushOptions();
+         $this->removeOptions();
     }
 
 
@@ -436,7 +436,7 @@ class Router implements RouterInterface
      *
      * @return void
     */
-    protected function flushOptions()
+    protected function removeOptions()
     {
          $this->options = [];
     }
