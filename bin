@@ -4,12 +4,12 @@
 /*
 |------------------------------------------------------------------
 |   Framework console
-|   Ex: $ php console --help or -h
-|   Ex: $ php console make:command SayHelloCommand
-|   Ex: $ php console make:controller HomeController
-|   Ex: $ php console make:model User
-|   Ex: $ php console make:addition -a=1 -b=2
-|   Ex: $ php console serve (run internal server php)
+|   Ex: $ php bin --help or -h
+|   Ex: $ php bin make:command SayHelloCommand
+|   Ex: $ php bin make:controller HomeController
+|   Ex: $ php bin make:model User
+|   Ex: $ php bin make:addition -a=1 -b=2
+|   Ex: $ php bin serve (run internal server php)
 |------------------------------------------------------------------
 */
 
