@@ -1,0 +1,366 @@
+<?php
+namespace Jan\Component\Database\Connection\PDO;
+
+
+use Closure;
+use Exception;
+use Jan\Component\Database\Contract\QueryInterface;
+use PDO;
+use PDOException;
+use PDOStatement;
+
+
+
+/**
+ * Class Query
+ *
+ * @package Jan\Component\Database\Connection\PDO
+*/
+class Query implements QueryInterface
+{
+
+     /**
+      * @var PDO
+     */
+     protected $pdo;
+
+
+     /**
+      * @var PDOStatement
+     */
+     protected $statement;
+
+
+
+     /**
+      * @var string
+     */
+     protected $sql;
+
+
+
+     /**
+      * @var int
+     */
+     protected $fetchMode = PDO::FETCH_OBJ;
+
+
+
+     /**
+      * @var string
+     */
+     protected $classMap;
+
+
+
+
+    /**
+      * @var array
+     */
+     protected $records = [];
+
+
+
+     /**
+      * @var array
+     */
+     protected $bindValues = [];
+
+
+
+     /**
+      * @var array
+     */
+     protected $params = [];
+
+
+
+     /**
+      * Statement constructor.
+      * @param PDO $pdo
+     */
+     public function __construct(PDO $pdo)
+     {
+          $this->pdo = $pdo;
+     }
+
+
+
+    /**
+     * @return mixed|void
+    */
+    public function beginTransaction()
+    {
+         $this->pdo->beginTransaction();
+    }
+
+
+    /**
+     * @return mixed|void
+    */
+    public function rollback()
+    {
+        $this->pdo->rollback();
+    }
+
+
+    /**
+     * @return mixed|void
+    */
+    public function commit()
+    {
+        $this->pdo->commit();
+    }
+
+
+     /**
+      * @param $sql
+      * @return $this
+     */
+     public function withSQL($sql): Query
+     {
+          $this->sql = $sql;
+
+         try {
+
+             $this->statement = $this->pdo->prepare($sql);
+
+         } catch (PDOException $e) {
+
+             throw $e;
+         }
+
+          return $this;
+     }
+
+
+      /**
+       * @return string
+       * @throws Exception
+      */
+      protected function getSQL(): string
+      {
+          return $this->sql;
+      }
+
+
+
+     /**
+      * @param $params
+      * @return $this
+     */
+     public function withParams($params): Query
+     {
+         $this->params = $params;
+
+         return $this;
+     }
+
+
+     /**
+      * @return array
+     */
+     public function getParams(): array
+     {
+         return $this->params;
+     }
+
+
+     /**
+      * @param $fetchMode
+      * @return $this
+    */
+    public function withFetchMode($fetchMode): Query
+    {
+        $this->fetchMode = $fetchMode;
+
+        return $this;
+    }
+
+
+    /**
+     * @param $classMap
+     * @return $this
+    */
+    public function withClassMap($classMap): Query
+    {
+        $this->classMap = $classMap;
+
+        return $this;
+    }
+
+
+     /**
+      * @param string $param
+      * @param $value
+      * @param int $type
+      * @return $this
+     */
+     public function bindValue(string $param, $value, int $type = 0): Query
+     {
+        $this->bindValues[] = [$param, $value, $type];
+
+        return $this;
+     }
+
+
+     /**
+      * @return Query
+     */
+     public function execute(): Query
+     {
+         try {
+
+             return $this->process();
+
+         } catch (PDOException $e) {
+
+             throw $e;
+         }
+     }
+
+
+     /**
+       * @return $this
+     */
+     protected function process(): Query
+     {
+         if(! $this->statement instanceof PDOStatement)
+         {
+             throw new PDOException('Error statement!');
+         }
+
+         if(! $this->bindValues || ! $this->params)
+         {
+             dd('OK1');
+             $this->exec($this->sql);
+
+             return $this;
+         }
+
+
+         if($this->params && ! $this->bindValues)
+         {
+             dd('Params');
+             if($this->statement->execute($this->params))
+             {
+                 $this->records[] = [$this->sql => $this->params];
+             }
+
+             return $this;
+         }
+
+         if($this->bindValues && ! $this->params)
+         {
+             dd('Bindings');
+             foreach ($this->bindValues as $bindValues)
+             {
+                 list($param, $value, $type) = $bindValues;
+                 $this->statement->bindValue($param, $value, $type);
+             }
+
+             if($this->statement->execute())
+             {
+                 $this->records[] = [$this->sql => $this->bindValues];
+             }
+
+             return $this;
+         }
+     }
+
+
+     /**
+      * @param string $sql
+      * @return bool
+     */
+     public function exec(string $sql): bool
+     {
+          if($this->pdo->exec($sql))
+          {
+               $this->records[] = [$sql => []];
+               return true;
+          }
+
+          return false;
+     }
+
+
+
+     /**
+      * @return array
+     */
+     public function getRecords(): array
+     {
+        return $this->records;
+     }
+
+
+     /**
+      * @return array
+     */
+     public function getQueryLog()
+     {
+         return $this->getRecords();
+     }
+
+     /**
+      * @param Closure $callback
+      * @throws PDOException|Exception
+      */
+     public function transaction(Closure $callback)
+     {
+        try {
+
+            $this->pdo->beginTransaction();
+
+            $callback($this);
+
+            $this->pdo->commit();
+
+        } catch (PDOException $e) {
+
+            $this->pdo->rollback();
+
+            throw $e;
+        }
+     }
+
+
+    /**
+     * Get first result
+     *
+     * @return mixed
+    */
+    public function first()
+    {
+        return $this->get()[0] ?? false;
+    }
+
+
+    /**
+     * @return array
+    */
+    public function getResult()
+    {
+        if($this->classMap)
+        {
+            return $this->statement->fetchAll(PDO::FETCH_CLASS, $this->classMap);
+        }
+
+        return $this->statement->fetchAll($this->fetchMode);
+    }
+
+
+    /**
+     * @return array
+    */
+    public function getOneRecord()
+    {
+        if($this->classMap)
+        {
+            return $this->statement->fetch(PDO::FETCH_CLASS, $this->classMap);
+        }
+
+        return $this->statement->fetch($this->fetchMode);
+    }
+}

@@ -1,0 +1,24 @@
+<?php
+namespace Jan\Component\Console\Input;
+
+
+use Jan\Component\Console\Input\Support\Input;
+
+
+/**
+ * Class ArrayInput
+ * @package Jan\Component\Console\Input
+*/
+class ArrayInput extends Input
+{
+
+    protected function parse()
+    {
+        // TODO: Implement parse() method.
+    }
+
+    public function getFirstArgument()
+    {
+        // TODO: Implement getFirstArgument() method.
+    }
+}

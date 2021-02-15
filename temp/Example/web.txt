@@ -1,0 +1,76 @@
+<?php
+/*
+  |------------------------------------------------------------------
+  |         WEB ROUTES OF APPLICATION
+  |         In this file you can register all lists routes
+  |------------------------------------------------------------------
+*/
+
+
+use Jan\Component\Http\Request;
+use Jan\Component\Http\Response;
+
+
+Route::get('/', "SiteController@index")
+       ->name('home')
+       ->middleware([
+           Jan\Foundation\Middlewares\BarMiddleware::class,
+           Jan\Foundation\Middlewares\Authenticated::class,
+           Jan\Foundation\Middlewares\FooMiddleware::class
+       ]);
+
+Route::get('/about', "SiteController@about")
+    ->name('about');
+
+
+Route::map('GET|POST', '/contact', "RegistrationController@contact")
+    ->name('contact');
+
+Route::map('GET|POST', '/login', "HomeController@login")
+    ->name('login');
+
+
+
+Route::get("/foo", function () {
+    echo "Foo!";
+});
+
+Route::get("/user/{name}", function (Request $request, $name) {
+
+    $params = $request->queryParams->all();
+    $attributes = $request->getAttribute('_routeParams');
+    dump($params, $attributes);
+
+    return new Response('Привет! как дела');
+
+})->where('name', '\w+');
+
+
+Route::get("/products", function () {
+
+    return [
+        'id' => 1,
+        'name' => 'Iphone 4',
+        'description' => 'this product is very recommended on the place market!',
+        'price' => '40000'
+    ];
+});
+
+
+
+
+Route::get('/product/{id}', function (Request $request, $id) {
+
+    /* dump($request); */
+    return new Response('viewed project '. $id);
+
+})->where('id', '\d+');
+
+
+Route::get('/user/{id}/edit', function (Request $request, $id) {
+
+    /* dump($request); */
+    return new Response('Edited user: '. $id);
+
+})->where('id', '\d+');
+

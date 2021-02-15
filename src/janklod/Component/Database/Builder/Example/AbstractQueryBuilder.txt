@@ -1,0 +1,378 @@
+<?php
+namespace Jan\Component\Database\ORM\Builder\Support;
+
+
+use Jan\Component\Database\Contract\SQLQueryBuilder;
+use Jan\Component\Database\ORM\Builder\Builder;
+
+
+/**
+ * Class AbstractQueryBuilder
+ * @package Jan\Component\Database\ORM\Builder\Support
+*/
+abstract class AbstractQueryBuilder implements SQLQueryBuilder
+{
+
+    const SELECT    = 'select';
+    const FROM      = 'from';
+    const WHERE     = 'where';
+    const JOIN      = 'join';
+    const ORDER_BY  = 'orderBy';
+    const LIMIT     = 'limit';
+    const HAVING    = 'having';
+    const UPDATE    = 'update';
+    const INSERT    = 'insert';
+    const DELETE    = 'delete';
+    const TABLE     = 'table';
+
+
+    /**
+     * @var array
+    */
+    protected $sql = [
+        self::SELECT   => "",
+        self::FROM     => "",
+        self::WHERE    => [],
+        self::JOIN     => "",
+        self::ORDER_BY => "",
+        self::LIMIT    => "",
+        self::HAVING   => "",
+        self::UPDATE   => "",
+        self::INSERT   => "",
+        self::DELETE   => "",
+        self::TABLE    => []
+    ];
+
+
+    /**
+     * @var string
+    */
+    protected $table;
+
+
+
+    /**
+     * @var string
+    */
+    protected $alias;
+
+
+    /**
+     * @var array
+    */
+    protected $parameters = [];
+
+
+
+    /**
+     * @param string $table
+     * @param string $alias
+     * @return SQLQueryBuilder
+    */
+    public function table(string $table, string $alias = ''): SQLQueryBuilder
+    {
+        $this->table = $table;
+        $this->alias = $alias;
+
+        return $this;
+    }
+
+
+
+    /**
+     * @param mixed ...$args
+     * @return SQLQueryBuilder
+    */
+    public function select(...$args): SQLQueryBuilder
+    {
+        // $this->reset();
+        $selects = $this->getSelectedFields($args);
+
+        return $this->addSelect($selects);
+    }
+
+
+
+    /**
+     * @param mixed ...$args
+     * @return SQLQueryBuilder|AbstractQueryBuilder
+    */
+    public function selectDistinct(...$args)
+    {
+        $this->reset();
+        $sql = "DISTINCT ". $this->getSelectedFields($args);
+
+        return $this->addSelect($sql);
+    }
+
+
+
+    /**
+     * @param $sql
+     * @return $this
+    */
+    public function addSelect($sql): SQLQueryBuilder
+    {
+        return $this->addSql(self::SELECT, sprintf('SELECT %s', $sql));
+    }
+
+
+
+    /**
+     * @param $table
+     * @param string $alias
+     * @return SQLQueryBuilder
+    */
+    public function from($table, $alias = ''): SQLQueryBuilder
+    {
+        $from = 'FROM '. $table . ($alias ? 'AS '. $alias : '');
+
+        return $this->addSql(self::FROM, $from);
+    }
+
+
+
+    /**
+     * @param string $condition
+     * @param string $operator
+     * @return SQLQueryBuilder
+    */
+    public function where(string $condition, string $operator = ''): SQLQueryBuilder
+    {
+        $this->sql[self::WHERE][] = ($operator ? "$operator $condition" : "WHERE $condition");
+
+        return $this;
+    }
+
+
+    /**
+     * @param string $condition
+     * @return SQLQueryBuilder
+    */
+    public function andWhere(string $condition): SQLQueryBuilder
+    {
+        return $this->where($condition, "AND");
+    }
+
+
+    /**
+     * @param string $condition
+     * @return SQLQueryBuilder
+    */
+    public function orWhere(string $condition): SQLQueryBuilder
+    {
+        return $this->where($condition, "OR");
+    }
+
+
+
+
+    /**
+     * @param int $start
+     * @param int $offset
+     * @return SQLQueryBuilder
+    */
+    public function limit(int $start, int $offset): SQLQueryBuilder
+    {
+        return $this->addSql(self::LIMIT, "LIMIT $start, $offset");
+    }
+
+
+
+
+    /**
+     * @param string $field
+     * @param string $sort
+     * @return AbstractQueryBuilder
+    */
+    public function orderBy(string $field, string $sort='asc'): SQLQueryBuilder
+    {
+        return $this->addSql(self::ORDER_BY, "ORDER BY $sort");
+    }
+
+
+    /**
+     * @param string $table
+     * @param string $condition
+     * @param string $type
+     * @return SQLQueryBuilder
+    */
+    public function join(string $table, string $condition, string $type = ''): SQLQueryBuilder
+    {
+        return $this->addSql(self::JOIN,"$type JOIN $table $condition");
+    }
+
+
+    /**
+     * @param array $columns
+     * @return SQLQueryBuilder
+    */
+    public function insert(array $columns): SQLQueryBuilder
+    {
+          return $this->addSql(self::INSERT, 'INSERT '. implode(', ', array_keys($columns)), true);
+    }
+
+
+    /**
+     * @param array $columns
+     * @return SQLQueryBuilder
+    */
+    public function update(array $columns): SQLQueryBuilder
+    {
+        return $this->addSql(self::UPDATE, 'UPDATE '. implode(',', $columns), true);
+    }
+
+
+    /**
+     * @param string $table
+     * @return SQLQueryBuilder
+    */
+    public function delete(string $table): SQLQueryBuilder
+    {
+        return $this->addSql(self::DELETE, 'DELETE TABLE '. $table);
+    }
+
+
+
+    /**
+     * @param $key
+     * @param $value
+     * @return SQLQueryBuilder
+    */
+    public function setParameter($key, $value): SQLQueryBuilder
+    {
+        $this->parameters[$key] = $value;
+
+        return $this;
+    }
+
+
+    /**
+     * @param array $parameters
+     * @return SQLQueryBuilder
+    */
+    public function setParameters(array $parameters): SQLQueryBuilder
+    {
+        foreach ($parameters as $key => $value)
+        {
+            $this->setParameter($key, $value);
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * @return array
+    */
+    public function getValues(): array
+    {
+         return array_values($this->parameters);
+    }
+
+
+    /**
+     * @return string
+    */
+    public function getSQL(): string
+    {
+        $builder = new Builder($this->sql);
+        return $builder->buildSQL();
+    }
+
+
+
+    /**
+     * @return mixed|void
+    */
+    public function reset()
+    {
+        $this->table = '';
+        $this->alias = '';
+        $this->sql = [];
+        $this->parameters = [];
+    }
+
+
+    /**
+     * @param SqlType $sqlType
+     * @param string $table
+     * @param string $alias
+     * @return $this
+     * @throws \Exception
+    */
+    public function addSql(SqlType $sqlType, string $table = '', string $alias = ''): QueryBuilder
+    {
+        $name = $sqlType->getName();
+
+        if(\array_key_exists($name, $this->sql))
+        {
+             throw new \Exception('name ('. $name .') already taken!');
+        }
+
+        if($sqlType->reset()) {
+            $this->flush();
+        }
+
+        if($table) {
+            $this->table = $table;
+        }
+
+        if($alias) {
+            $this->alias = $alias;
+        }
+
+        $sqlType->setTable($this->table, $this->alias);
+
+        $this->sql[$name] = $sqlType->build();
+
+        return $this;
+    }
+
+
+
+    /**
+     * @param string $field
+     * @param $value
+     * @param string $operator
+     * @param string $condition
+     * @return $this
+     * @throws \Exception
+    */
+    protected function addCondition(string $field, $value, string $operator = '=', string $condition = ''): AbstractQueryBuilder
+    {
+        /*
+        if (!in_array($this->type, ['select', 'update', 'delete'])) {
+            throw new \Exception("WHERE can only be added to SELECT, UPDATE OR DELETE");
+        }
+
+        return $this->addWhere("$field $operator ?" . ($condition ?? ''), $value);
+        */
+
+    }
+
+
+
+    /**
+     * @param string $sql
+     * @param string $operator
+     * @return SQLQueryBuilder
+    */
+    protected function addWhere(string $sql, string $operator = ''): SQLQueryBuilder
+    {
+         $this->sql['where'][] = $operator ? "$sql $operator" : "$sql";
+
+         return $this;
+    }
+
+
+
+    /**
+     * @param array $fields
+     * @return string
+    */
+    protected function getSelectedFields(array $fields = []): string
+    {
+       return ! empty($fields) ? implode(', ', $fields) : "*";
+    }
+}

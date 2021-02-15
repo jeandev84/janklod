@@ -1,0 +1,36 @@
+<?php
+namespace Jan\Component\Database\Contract;
+
+
+/**
+ * Interface ManagerInterface
+ *
+ * @package Jan\Component\Database\Contract
+*/
+interface ManagerInterface
+{
+
+     /**
+       * Open the connection to the database
+       *
+       * @param array $options (configuration to database)
+       * @return mixed
+     */
+     public function open(array $options = []);
+
+
+     /**
+      * Get connection
+      *
+      * @return mixed
+     */
+     public function connection();
+
+
+     /**
+      * Close the connection
+      *
+      * @return mixed
+     */
+     public function close();
+}

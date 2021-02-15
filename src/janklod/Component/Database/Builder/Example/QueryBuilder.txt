@@ -1,0 +1,160 @@
+<?php
+namespace Jan\Component\Database\ORM\Query;
+
+
+use Jan\Component\Database\Connection\PDO\Query;
+
+
+
+/**
+ * Class QueryBuilder
+ *
+ * @package Jan\Component\Database\ORM\Query
+*/
+class QueryBuilder
+{
+
+     /**
+      * @var array
+     */
+     protected $sql = [];
+
+
+     /**
+      * @var array
+     */
+     protected $values = [];
+
+
+     /**
+      * @var Query
+     */
+     protected $query;
+
+
+     /**
+      * QueryBuilder constructor.
+      * @param Query $query // QueryInterface
+     */
+     public function __construct(Query $query)
+     {
+         $this->query = $query;
+     }
+
+
+//     /**
+//      * @param $name
+//      * @param $arguments
+//      * @return $this
+//     */
+//     public function __call($name, $arguments): QueryBuilder
+//     {
+//          // name : SelectType, arguments: function args
+//          if(! method_exists($this, $name))
+//          {
+//                // create type and parse arguments
+//          }
+//
+//          $this->sql[mb_strtolower($name)] = new $name($arguments);
+//
+//          return $this;
+//     }
+
+
+//     /**
+//      * @param string[] $fields
+//      * @return $this
+//     */
+//     public function select($fields = ["*"]): QueryBuilder
+//     {
+//         return $this;
+//     }
+
+
+      /**
+      * @param array ...$fields
+       * @return $this
+      */
+      public function select(...$fields): QueryBuilder
+      {
+         return $this;
+      }
+
+
+
+     /**
+      * @param $table
+      * @param string $alias
+      * @return $this
+     */
+     public function from($table, $alias = ''): QueryBuilder
+     {
+         return $this;
+     }
+
+
+     /**
+      * @return $this
+     */
+     public function where(): QueryBuilder
+     {
+         return $this;
+     }
+
+
+     /**
+      * @return $this
+     */
+     public function join(): QueryBuilder
+     {
+        return $this;
+     }
+
+
+     /**
+      * @return $this
+     */
+     public function orderBy(): QueryBuilder
+     {
+        return $this;
+     }
+
+
+     /**
+      * @return $this
+     */
+     public function limit(): QueryBuilder
+     {
+         return $this;
+     }
+
+
+     /**
+      * @return string
+     */
+     public function getSQL(): string
+     {
+         return join(', ', $this->sql);
+     }
+
+
+     /**
+      * @return Query
+     */
+     public function getQuery(): Query
+     {
+        return $this->execute($this->getSQL(), $this->values);
+     }
+
+
+     /**
+      * @param $sql
+      * @param array $params
+      * @param null $classMap
+      * @return Query
+     */
+     public function execute($sql, $params = [], $classMap = null): Query
+     {
+         return $this->query->query($sql, $params, $classMap)->execute();
+     }
+}

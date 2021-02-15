@@ -1,0 +1,125 @@
+<?php
+namespace Jan\Component\Console\Input\Support;
+
+
+use Jan\Component\Console\Input\Contract\InputInterface;
+
+
+/**
+ * Class Input
+ * @package Jan\Component\Console\Input\Support
+*/
+abstract class Input implements InputInterface
+{
+
+       /**
+        * @var array
+       */
+       protected $tokens = [];
+
+
+       /**
+        * @var array
+       */
+       protected $arguments = [];
+
+
+       /**
+        * @var array
+       */
+       protected $options = [];
+
+
+       /**
+        * Input constructor.
+        *
+        * @param array $tokens
+       */
+       public function __construct(array $tokens)
+       {
+            $this->bindTokens($tokens);
+            $this->validate();
+       }
+
+
+       /**
+        * @return string
+       */
+       public function getFirstArgument()
+       {
+           return $this->getToken(0);
+       }
+
+
+       /**
+        * @return array|mixed
+       */
+       public function getTokens()
+       {
+           return $this->tokens;
+       }
+
+
+       /**
+        * @param $index
+        * @param null $default
+        * @return mixed|null
+       */
+       protected function getToken($index, $default = '')
+       {
+           return $this->tokens[$index] ?? $default;
+       }
+
+
+       /**
+        * @return array
+       */
+       public function getArguments()
+       {
+           return $this->arguments;
+       }
+
+
+       /**
+        * @param string $name
+        * @return string|void|null
+       */
+       public function getArgument(string $name)
+       {
+
+       }
+
+
+       /**
+        * @return array
+       */
+       public function getOptions()
+       {
+           return $this->options;
+       }
+
+
+       /**
+        * @param string $name
+        * @return string|void|null
+       */
+       public function getOption(string $name)
+       {
+
+       }
+
+       public function validate()
+       {
+
+       }
+
+       /**
+        * @param array $tokens
+       */
+       public function bindTokens(array $tokens)
+       {
+            $this->tokens = $tokens;
+       }
+
+       abstract protected function parse();
+}

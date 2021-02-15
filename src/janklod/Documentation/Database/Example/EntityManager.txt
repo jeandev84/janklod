@@ -1,0 +1,335 @@
+<?php
+namespace Jan\Component\Database;
+
+
+use Exception;
+use Jan\Component\Database\Contract\EntityManagerInterface;
+use Jan\Component\Database\ORM\Exception\EntityException;
+use Jan\Component\Database\ORM\Repository\ServiceRepository;
+use ReflectionException;
+use ReflectionObject;
+
+
+/**
+ * Class EntityManager
+ * @package Jan\Component\Database
+*/
+class EntityManager implements EntityManagerInterface
+{
+
+
+    use ConnectionTrait;
+
+
+    /**
+     * @var array
+    */
+    protected $entityMapped = [];
+
+
+
+    /**
+     * @var array
+    */
+    protected $entityInsertions = [];
+
+
+
+    /**
+     * @var array
+    */
+    protected $entityDeletions = [];
+
+
+
+    /**
+     * @var array
+    */
+    protected $entityUpdates = [];
+
+
+
+    /**
+     * Map entity class
+     *
+     * @param string $entityName
+     * @param ServiceRepository $repository
+    */
+    public function map(string $entityName, ServiceRepository $repository)
+    {
+        $this->entityMapped[$entityName] = $repository;
+    }
+
+
+    /**
+     * @param object $object
+     * @return bool
+    */
+    public function isMapped(string $entityName): bool
+    {
+         return isset($this->entityMapped[$entityName]);
+    }
+
+
+    /**
+     * @param array $entities
+     * @return mixed|void
+    */
+    public function mapEntityClasses(array $entities)
+    {
+        foreach ($entities as $entityName => $repository)
+        {
+             $this->map($entityName, $repository);
+        }
+    }
+
+
+
+    /**
+     * Get entity classes
+     *
+     * @return array
+    */
+    public function getEntityClasses(): array
+    {
+         return $this->entityMapped;
+    }
+
+
+    /**
+     * @param $entityName
+     *
+     * @return ServiceRepository
+     * @throws EntityException
+    */
+    public function getRepository($entityName): ServiceRepository
+    {
+        if(! $this->isMapped($entityName))
+        {
+            throw new EntityException('Cannot get repository for entity ( '. $entityName.' ) ');
+        }
+
+        return $this->entityMapped[$entityName];
+    }
+
+
+    /**
+     * @param object $object
+     * @throws Exception
+    */
+    public function update(object $object)
+    {
+         $this->entityUpdates[$this->getObjectName($object)] = $object;
+    }
+
+
+    /**
+     * @param object $object
+     * @return void
+     * @throws Exception
+    */
+    public function persist(object $object)
+    {
+         $this->entityInsertions[$this->getObjectName($object)] = $object;
+    }
+
+
+    /**
+     * @param object $object
+     * @return void
+     * @throws Exception
+    */
+    public function remove(object $object)
+    {
+          $this->entityDeletions[$this->getObjectName($object)] = $object;
+    }
+
+
+    /**
+     * @return mixed|void
+     * @throws Exception
+    */
+    public function flush()
+    {
+        $this->insertRecords();
+        $this->deleteRecords();
+        $this->updateRecords();
+    }
+
+
+    /**
+     * @throws EntityException
+     * @throws Exception
+    */
+    protected function insertRecords()
+    {
+        if($this->entityInsertions)
+        {
+            array_map(function ($entityName, $object) {
+
+                if(method_exists($object, 'prePersist'))
+                {
+                    $object->prePersist();
+                }
+
+                $properties = $this->getFilteredClassMetaData($object);
+                $this->getRepository($entityName)->insert($properties);
+
+            }, $this->entityInsertions);
+
+            /*
+            foreach ($this->entityInsertions as $entityName => $object)
+            {
+                if(method_exists($object, 'prePersist'))
+                {
+                     $object->prePersist();
+                }
+
+                $properties = $this->getFilteredClassMetaData($object);
+                $this->getRepository($entityName)->insert($properties);
+            }
+            */
+        }
+    }
+
+
+    /**
+     * @throws Exception
+    */
+    protected function deleteRecords()
+    {
+        if($this->entityDeletions)
+        {
+            array_map(function ($entityName, $object) {
+
+                if(method_exists($object, 'preRemove'))
+                {
+                    $object->preRemove();
+                }
+
+                $properties = $this->getFilteredClassMetaData($object);
+                $this->getRepository($entityName)->delete($this->getId($object), $properties);
+
+            }, $this->entityDeletions);
+
+            /*
+            foreach ($this->entityDeletions as $entityName => $object)
+            {
+                if(method_exists($object, 'preRemove'))
+                {
+                    $object->preRemove();
+                }
+
+                $properties = $this->getFilteredClassMetaData($object);
+                $this->getRepository($entityName)->delete($this->getId($object), $properties);
+            }
+            */
+        }
+    }
+
+
+    /**
+     * @throws EntityException
+     * @throws Exception
+     */
+    protected function updateRecords()
+    {
+        if($this->entityUpdates)
+        {
+            array_map(function ($entityName, $object) {
+
+                if(method_exists($object, 'preUpdate'))
+                {
+                    $object->preUpdate();
+                }
+
+                $properties = $this->getFilteredClassMetaData($object);
+                $this->getRepository($entityName)->update($this->getId($object), $properties);
+
+            }, $this->entityUpdates);
+
+            /*
+            foreach ($this->entityUpdates as $entityName => $object)
+            {
+                if(method_exists($object, 'preUpdate'))
+                {
+                    $object->preUpdate();
+                }
+
+                $properties = $this->getFilteredClassMetaData($object);
+                $this->getRepository($entityName)->update($this->getId($object), $properties);
+            }
+            */
+        }
+    }
+
+
+    /**
+     * @param object $instance
+     * @return array
+     * @throws Exception
+    */
+    protected function getClassMetaData(object $object): array
+    {
+        $mappedProperties = [];
+        $reflectedObject = new ReflectionObject($object);
+
+        foreach($reflectedObject->getProperties() as $property)
+        {
+            $property->setAccessible(true);
+            $mappedProperties[$property->getName()] = $property->getValue($object);
+        }
+
+        return $mappedProperties;
+    }
+
+
+    /**
+     * @param object $object
+     * @return array
+     * @throws Exception
+    */
+    protected function getFilteredClassMetaData(object $object): array
+    {
+        if(\array_key_exists('id', $properties = $this->getClassMetaData($object)))
+        {
+            unset($properties['id']);
+        }
+
+        return $properties;
+    }
+
+
+
+    /**
+     * @param object $object
+     * @return int
+     * @throws Exception
+    */
+    protected function getId(object $object): int
+    {
+        $mappedProperties = $this->getClassMetaData($object);
+
+        if (method_exists($object, 'getId'))
+        {
+             return $object->getId();
+        }
+
+        if(! \array_key_exists('id', $mappedProperties))
+        {
+            throw new Exception('The entity ( '. $this->getObjectName($object) . ') has not property id.');
+        }
+
+        return $mappedProperties['id'];
+    }
+
+
+    /**
+     * @param object $object
+     * @return false|string
+    */
+    protected function getObjectName(object $object)
+    {
+         return \get_class($object);
+    }
+}

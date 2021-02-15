@@ -1,0 +1,148 @@
+<?php
+namespace Jan\Component\Database\ORM;
+
+
+use Jan\Component\Database\Capsule;
+use Jan\Component\Database\Contract\ManagerInterface;
+use Jan\Component\Database\ORM\Repository\EntityRepository;
+
+
+/**
+ * Class Model
+ * @package Jan\Component\Database
+*/
+class Model extends ActiveRecord
+{
+
+
+     /**
+      * @var array
+     */
+     protected $attributes = [];
+
+
+     /**
+      * @var array
+     */
+     protected $fillable = [];
+
+
+
+     /**
+      * @var string[]
+     */
+     protected $guarded = ['id'];
+
+
+     /**
+      * @var array
+     */
+     protected $hidden  = [];
+
+
+
+     /**
+      * Model constructor.
+      * @throws \Exception
+     */
+     public function __construct()
+     {
+          parent::__construct(Capsule::getInstance());
+          $this->setEntityClass(get_called_class());
+          $this->setTable($this->table);
+     }
+
+
+
+    /**
+     * Get entity repository
+     * @throws \Exception
+    */
+    private function getEntityRepository(): EntityRepository
+    {
+        $database = Capsule::getInstance();
+        $repository = new EntityRepository($database);
+        $repository->setEntityClass(get_called_class());
+        $repository->setTableName($this->table);
+        return $repository;
+    }
+
+
+
+    /**
+      * @param $column
+      * @param $value
+     */
+     public function setAttribute($column, $value)
+     {
+          $this->attributes[$column] = $value;
+     }
+
+
+     /**
+      * @param $column
+      * @return bool
+     */
+     public function hasAttribute($column)
+     {
+          return isset($this->attributes[$column]);
+     }
+
+
+     /**
+      * @param $column
+      * @return mixed
+      * @throws \Exception
+     */
+     public function getAttribute($column)
+     {
+         if(! $this->hasAttribute($column))
+         {
+              throw new \Exception('Invalid column name : ('. $column .')');
+         }
+
+         return $this->attributes[$column];
+     }
+
+
+
+     /**
+      * @param $column
+      * @param $value
+     */
+     public function __set($column, $value)
+     {
+          $this->setAttribute($column, $value);
+     }
+
+
+     /**
+      * @param $column
+      * @return mixed
+      * @throws \Exception
+     */
+     public function __get($column)
+     {
+         return $this->getAttribute($column);
+     }
+
+
+     /**
+       * @param $name
+       * @param $arguments
+     */
+     public static function __callStatic($name, $arguments)
+     {
+           dd($name);
+     }
+
+
+
+     /**
+      * Store data to the database
+     */
+     public function save()
+     {
+
+     }
+}

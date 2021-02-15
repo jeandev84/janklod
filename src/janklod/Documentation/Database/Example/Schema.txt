@@ -1,0 +1,124 @@
+<?php
+namespace Jan\Component\Database;
+
+
+
+use Closure;
+use Exception;
+use Jan\Component\Database\Contract\ManagerInterface;
+use Jan\Component\Database\Table\BluePrint;
+
+
+/**
+ * Class Schema
+ * @package Jan\Component\Database\Table
+ */
+class Schema
+{
+
+
+    use ConnectionTrait;
+
+
+    protected $manager;
+
+
+    /**
+     * Schema constructor.
+     * @param ManagerInterface|null $manager
+    */
+    public function __construct(ManagerInterface $manager = null)
+    {
+        if(! $manager)
+        {
+            $manager = new DatabaseManager();
+        }
+
+        $this->manager = $manager;
+    }
+
+
+    /**
+     * @param string $table
+     * @param Closure $closure
+     * @return string
+     * @throws Exception
+     */
+    public static function create(string $table, Closure $closure): string
+    {
+        $table = self::resolveTableName($table);
+
+        $bluePrint = new BluePrint($table);
+
+        $closure($bluePrint);
+
+        $sql = sprintf('CREATE TABLE IF NOT EXISTS `%s` (%s) ENGINE=%s DEFAULT CHARSET=%s;%s',
+            $table,
+            $bluePrint->buildDefaultColumnSql(),
+            $bluePrint->buildAlteredColumnSql(),
+            Database::config(Configuration::KEY_ENGINE),
+            Database::config(Configuration::KEY_CHARSET)
+        );
+
+        self::connection()->exec($sql);
+    }
+
+
+    /**
+     * @param string $table
+     * @throws Exception
+     */
+    public static function drop(string $table)
+    {
+        self::connection()->exec(
+            sprintf('DROP TABLE `%s`;', self::resolveTableName($table))
+        );
+    }
+
+
+    /**
+     * @param $table
+     * @return Schema
+     * @throws Exception
+     */
+    public static function dropIfExists($table): Schema
+    {
+        self::connection()->exec(
+            sprintf('DROP TABLE IF EXISTS `%s`;', self::resolveTableName($table))
+        );
+    }
+
+
+    /**
+     * @param $table
+     * @return Schema
+     * @throws \Exception
+     */
+    public static function truncate($table): Schema
+    {
+        static::connection()->exec(
+            sprintf('TRUNCATE TABLE `%s`;', self::resolveTableName($table))
+        );
+    }
+
+
+
+    /**
+     * @param $table
+     * @return string
+     * @throws Exception
+    */
+    protected static function resolveTableName($table): string
+    {
+        return Database::config(Configuration::KEY_PREFIX). $table;
+    }
+}
+
+/*
+Schema::create('users', function (BluePrint $table) {
+    $table->increments('id');
+    $table->string('username');
+    $table->string('password');
+    $table->string('role');
+});
+*/

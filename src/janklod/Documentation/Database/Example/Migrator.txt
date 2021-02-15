@@ -1,0 +1,246 @@
+<?php
+namespace Jan\Component\Database\Migration;
+
+
+use Exception;
+use Jan\Component\Database\ConnectionTrait;
+use Jan\Component\Database\Migration\Schema;
+use Jan\Component\Database\Table\BluePrint;
+
+
+
+/**
+ * Class Migrator <<Version control>>
+ *
+ * @package Jan\Component\Database\Migration
+*/
+class Migrator
+{
+
+      /**
+       * migration table version
+       *
+       * @var string
+      */
+      protected $migrationTable = 'migrations';
+
+
+      /**
+       * @var array
+      */
+      protected $migrations = [];
+
+
+
+      /**
+       * @var \Jan\Component\Database\Migration\Schema
+      */
+      protected $schema;
+
+
+
+      /**
+        * Migrator constructor.
+        * @param \Jan\Component\Database\Migration\Schema $schema
+      */
+      public function __construct(Schema $schema)
+      {
+          $this->schema = $schema;
+      }
+
+
+
+      /**
+       * Set table name for versions migrations
+       *
+       * @param string $migrationTable
+       * @return $this
+      */
+      public function setMigrationTable(string $migrationTable): Migrator
+      {
+           $this->migrationTable = $migrationTable;
+
+           return $this;
+      }
+
+
+      /**
+       * @param Migration $migration
+       * @return Migrator
+      */
+      public function addMigration(Migration $migration): Migrator
+      {
+           $this->migrations[] = $migration;
+
+           return $this;
+      }
+
+
+      /**
+       * $migrations = glob("/Migrations/*.php")
+       *
+       * @param array $migrations
+       * @return $this
+      */
+      public function setMigrations(array $migrations): Migrator
+      {
+            foreach ($migrations as $migration)
+            {
+                if($migration instanceof Migration)
+                {
+                     $this->addMigration($migration);
+                }
+            }
+      }
+
+
+      /**
+       * @return mixed
+      */
+      public function getOldMigrations()
+      {
+           // data
+           return $this->schema->executeSQL(
+               "SELECT `version` FROM {$this->migrationTable}"
+           );
+      }
+
+
+      /**
+       * @return array
+      */
+      public function getNewMigrations()
+      {
+          $newMigrations = [];
+
+          foreach ($this->migrations as $migration)
+          {
+              if(! \in_array(get_class($migration), $this->getOldMigrations()))
+              {
+                   $newMigrations[] = $migration;
+              }
+          }
+
+          return $newMigrations;
+      }
+
+
+      /**
+       * Install migration version table
+       *
+       * @throws Exception
+      */
+      public function install()
+      {
+          // create schema default table "migrations"
+          $this->schema->create($this->migrationTable, function (BluePrint $table) {
+              //
+              $table->increments('id');
+              $table->string('version');
+              /* $table->boolean('installed'); */
+              $table->datetime('executedAt');
+          });
+
+      }
+
+
+     /**
+      * Migrate table to the database
+      * @param array $migrations
+      * @return
+     */
+     public function migrate(array $migrations = [])
+     {
+          $this->install();
+
+          if($migrations)
+          {
+               $this->migrations = $migrations;
+          }
+
+
+          // migrate all migrations to the database
+          foreach ($this->migrations as $migration)
+          {
+               if(method_exists($migration, 'up'))
+               {
+                    $migration->up();
+
+                    $this->schema->executeSQL(
+                        sprintf("INSERT INTO `%s` (version, executedAt) VALUES ('%s', '%s')",
+                            $this->migrationTable,
+                            $migration->getVersion(),
+                            $migration->getExecutedAt()
+                        )
+                    );
+               }
+          }
+     }
+
+
+     /**
+      * @throws Exception
+     */
+     public function diff()
+     {
+         foreach ($this->getNewMigrations() as $migration)
+         {
+              $this->migrate($migration);
+         }
+     }
+
+
+
+     /**
+      * Drop all tables
+     */
+     public function rollback()
+     {
+        foreach ($this->migrations as $migration)
+        {
+            if(method_exists($migration, 'down'))
+            {
+                 $migration->down();
+
+                 $this->schema->truncate($this->migrationTable);
+             }
+         }
+     }
+
+
+     /**
+      * @throws Exception
+     */
+     public function reset()
+     {
+          $this->rollback();
+          $this->schema->drop($this->migrationTable);
+     }
+}
+
+
+/*
+
+$database = new DatabaseManager();
+$database->open([
+    'driver'    => 'mysql',
+    'database'  => 'default',
+    'host'      => '127.0.0.1',
+    'port'      => '3306',
+    'charset'   => 'utf8',
+    'username'  => 'root',
+    'password'  => 'secret',
+    'collation' => 'utf8_unicode_ci',
+    'options'   => [],
+    'prefix'    => '',
+    'engine'    => 'innoDB',
+    'migrationTable' => '',
+    'migration_dir' => ''
+]);
+
+$schema = new Schema($database);
+$migrator = new Migrator($schema);
+
+$migrator->migrate();
+$migrator->rollback();
+*/

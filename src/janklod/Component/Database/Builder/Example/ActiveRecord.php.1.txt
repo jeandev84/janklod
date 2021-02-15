@@ -1,0 +1,12 @@
+<?php
+namespace Jan\Component\Database\ORM;
+
+
+/**
+ * Class ActiveRecord
+ * @package Jan\Component\Database\ORM
+*/
+class ActiveRecord
+{
+
+}

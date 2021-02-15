@@ -1,0 +1,152 @@
+<?php
+namespace Jan\Component\Database\ORM\Repository;
+
+
+use Exception;
+use Jan\Component\Database\Connection\Query;
+use Jan\Component\Database\ConnectionTrait;
+use Jan\Component\Database\ORM\Builder\QueryBuilder;
+use Jan\Component\Database\ORM\Contract\EntityRepositoryInterface;
+
+
+
+/**
+ * Class EntityRepository
+ * @package Jan\Component\Database\ORM\Repository
+*/
+class EntityRepository implements EntityRepositoryInterface
+{
+
+     use ConnectionTrait;
+
+
+    /**
+     * @param string $alias
+     * @return QueryBuilder
+     * @throws Exception
+    */
+    public function createQueryBuilder(string $alias = ''): QueryBuilder
+    {
+        $queryBuilder = new QueryBuilder($this->getQuery());
+
+        return $queryBuilder->select()
+                            ->from($this->getTableName(), $alias);
+    }
+
+
+
+    /**
+     * @param $id
+     * @return mixed
+     * @throws Exception
+    */
+    public function find($id)
+    {
+       return $this->createQueryBuilder()
+                   ->getQuery()
+                   ->first();
+    }
+
+    /**
+     * @param $criteria
+     * @return mixed
+     */
+    public function findBy($criteria)
+    {
+
+    }
+
+
+
+    /**
+     * @param $criteria
+     * @return mixed
+    */
+    public function findOne($criteria)
+    {
+
+    }
+
+
+    public function all()
+    {
+
+    }
+
+
+    /**
+     *
+    */
+    public function store()
+    {
+         $reflectedObject = new \ReflectionObject($this);
+    }
+
+
+    /**
+     * insert or update data to the database
+    */
+    public function save()
+    {
+        //
+    }
+
+
+    /**
+     * @param array $attributes
+    */
+    public function create(array $attributes)
+    {
+
+    }
+
+
+    public function update(array $attributes)
+    {
+
+    }
+
+
+    public function delete($criteria)
+    {
+
+    }
+
+    protected function mapEntityProperties()
+    {
+
+    }
+
+
+    /**
+     * @return string
+     * @throws Exception
+    */
+    protected function getTableName(): string
+    {
+        throw new Exception('table name must be implemented');
+    }
+
+
+    /**
+     * @param $sql
+     * @param array $params
+     * @return Query
+     * @throws Exception
+    */
+    private function execute($sql, $params = []): Query
+    {
+        return $this->createQueryBuilder()->execute($sql, $params, get_called_class());
+    }
+
+
+    /**
+     * @param $sql
+     * @return bool
+     * @throws Exception
+    */
+    private function exec($sql): bool
+    {
+        return $this->getQuery()->exec($sql);
+    }
+}

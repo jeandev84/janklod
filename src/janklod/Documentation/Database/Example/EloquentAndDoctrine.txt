@@ -1,0 +1,129 @@
+<?php
+
+$database = new \Jan\Component\Database\DatabaseManager();
+
+
+$pgsqlConfig = [
+    'driver' => 'pgsql',
+    'database' => 'janklod',
+    'host' => '127.0.0.1',
+    'port' => '5432',
+    'username' => 'postgres',
+    'password' => '123456',
+    'collation' => 'utf8_unicode_ci',
+    'charset' => 'utf8',
+    'prefix' => '',
+    'engine' => 'InnoDB', // MyISAM
+    'options' => [],
+];
+
+
+/*
+try {
+    $database->open($pgsqlConfig);
+} catch (Exception $e) {
+    throw $e;
+}
+*/
+
+$mysqlConfig = [
+    'driver' => 'mysql',
+    'database' => 'janklod',
+    'host' => '127.0.0.1',
+    'port' => '3306',
+    'username' => 'root',
+    'password' => '',
+    'collation' => 'utf8_unicode_ci',
+    'charset' => 'utf8',
+    'prefix' => '',
+    'engine' => 'InnoDB', // MyISAM
+    'options' => [],
+];
+
+
+try {
+    $database->open($mysqlConfig);
+} catch (Exception $e) {
+    throw $e;
+}
+
+
+//
+///* echo realpath(__DIR__.'/../../app/Entity/User.php'); */
+//$entityFiles = glob(__DIR__.'/../../app/Entity/*.php'); /* dump($entityFiles); */
+//
+//$entities = [];
+//
+//foreach ($entityFiles as $entityFilename)
+//{
+//    $infoFile = pathinfo($entityFilename);
+//    // dump($infoFile);
+//    $entityName = "App\\Entity\\". $infoFile['filename'];
+//    $repositoryName = "App\\Repository\\". $infoFile['filename']."Repository";
+//
+//    $repository = new $repositoryName($database, $entityName);
+//    $entities[$entityName] = $repository;
+//}
+//
+//
+//$entityManager = new \Jan\Component\Database\EntityManager();
+//$entityManager->setManager($database);
+//$entityManager->setEntities($entities);
+//
+//
+///*
+//dump($entityManager, $entityManager->getConnection(), $entityManager->getConfiguration());
+//dump($entityManager->getRepository(\App\Entity\User::class));
+//*/
+//
+//
+//$user = new \App\Entity\User();
+//$user->setSurname('Яо');
+//$user->setPatronymic('Куасси');
+//$user->setName('Жан-Клод');
+//$user->setEmail('jeanyao@ymail.com');
+//$user->setPassword('qwerty');
+//$user->setHobbies('Музыки');
+//$user->setRegion('Москва');
+//$user->setSex('Мужской');
+//
+//
+//
+//// $entityManager->update($user);
+//
+//// dump($user);
+//
+//
+//$entityManager->persist($user);
+//
+//
+//$user = new \App\Entity\User();
+//$user->setId(1);
+//$user->setSurname('Яо');
+//$user->setPatronymic('Куасси');
+//$user->setName('Жан-Клод');
+//$user->setEmail('jeanyao@ymail.com');
+//$user->setPassword('qwerty');
+//$user->setHobbies('Музыки');
+//$user->setRegion('Москва');
+//$user->setSex('Мужской');
+//
+//
+//
+//$entityManager->update($user);
+//$entityManager->remove($user);
+//
+//$entityManager->flush();
+//
+//
+//$database->setManager($entityManager);
+//dump($database->getManager());
+
+
+$capsule = new \Jan\Component\Database\Capsule();
+$capsule->addConnection($mysqlConfig);
+$capsule->setAsGlobal();
+
+
+
+\App\Entity\Product::findAll();

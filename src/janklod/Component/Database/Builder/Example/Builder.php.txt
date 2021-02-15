@@ -1,0 +1,74 @@
+<?php
+namespace Jan\Component\Database\ORM\Builder;
+
+
+use Jan\Component\Database\Contract\ConnectionInterface;
+use Jan\Component\Database\Contract\QueryInterface;
+use Jan\Component\Database\ORM\Builder\Type\DeleteType;
+use Jan\Component\Database\ORM\Builder\Type\FromType;
+use Jan\Component\Database\ORM\Builder\Type\JoinType;
+use Jan\Component\Database\ORM\Builder\Type\LimitType;
+use Jan\Component\Database\ORM\Builder\Type\OrderByType;
+use Jan\Component\Database\ORM\Builder\Type\SelectType;
+use Jan\Component\Database\ORM\Builder\Type\Support\SqlType;
+use Jan\Component\Database\ORM\Builder\Type\UpdateType;
+
+
+/**
+ * Class Builder
+ *
+ * @package Jan\Component\Database\ORM\Builder
+*/
+class Builder extends QueryBuilder
+{
+
+    /**
+     * @var ConnectionInterface
+    */
+    protected $connection;
+
+
+
+    /**
+     * @var QueryInterface
+    */
+    protected $query;
+
+
+
+    /**
+     * Builder constructor.
+     * @param ConnectionInterface $connection
+    */
+    public function __construct(ConnectionInterface $connection)
+    {
+        $this->connection = $connection;
+        $this->query      = $connection->getQuery();
+    }
+
+
+    /**
+     * @return QueryInterface
+    */
+    public function getQuery(): QueryInterface
+    {
+        $this->query->setSQL($this->getSQL());
+        $this->query->setParams($this->values);
+
+        return $this->query;
+    }
+
+
+    /**
+     * @return array
+     * @throws \Exception
+    */
+    public function findAll(): array
+    {
+        $this->select(["*"]);
+        // $qb->getQuery(get_called_class());
+
+        return $this->getQuery()->getResult();
+    }
+
+}
