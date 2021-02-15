@@ -57,4 +57,13 @@ https://app.mailjet.com/dashboard
 6. service mysql restart
 ```
 
-
+7. Git repository
+```
+echo "# janklod" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/jeandev84/janklod.git
+git push -u origin main
+```
