@@ -57,7 +57,7 @@ https://app.mailjet.com/dashboard
 6. service mysql restart
 ```
 
-7
+7. Git repository
 ```
 echo "# janklod" >> README.md
 git init
