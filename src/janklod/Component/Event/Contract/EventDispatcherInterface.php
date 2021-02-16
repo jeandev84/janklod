@@ -11,25 +11,25 @@ interface EventDispatcherInterface
 {
 
      /**
-       * @param $eventName
-       * @param $event
+       * @param string $eventName
+       * @param EventInterface $event
        * @return mixed
      */
-     public function addListener($eventName, $event);
+     public function addListener(string $eventName, EventInterface $event);
 
 
 
      /**
-      * @param $eventName
+      * @param string $eventName
       * @return array
      */
-     public function getListenersByEvent($eventName): array;
+     public function getListenersByEvent(string $eventName): array;
 
 
 
      /**
-      * @param $event
+      * @param EventInterface $event
       * @return mixed
      */
-     public function dispatch($event /*, string $eventName */);
+     public function dispatch(EventInterface $event /*, string $eventName */);
 }
