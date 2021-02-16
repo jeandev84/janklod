@@ -3,7 +3,7 @@ namespace Jan\Foundation\Facade\Routing;
 
 
 use Jan\Component\Routing\Router;
-use Jan\Foundation\Facade;
+use Jan\Component\Container\Facade\Facade;
 
 
 /**

@@ -2,7 +2,7 @@
 namespace Jan\Foundation\Facade\Templating;
 
 
-use Jan\Foundation\Facade;
+use Jan\Component\Container\Facade\Facade;
 
 
 /**

@@ -3,7 +3,7 @@ namespace Jan\Foundation\Facade\Database;
 
 
 use Jan\Component\Database\Contract\ManagerInterface;
-use Jan\Foundation\Facade;
+use Jan\Component\Container\Facade\Facade;
 
 
 /**
