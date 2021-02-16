@@ -58,12 +58,10 @@ class Query
     protected $manager;
 
 
-
-
     /**
      * Query constructor.
      * @param ManagerInterface|null $manager
-     * @throws \Exception
+     * @param string|null $entityClass
     */
     public function __construct(ManagerInterface $manager, string $entityClass = null)
     {

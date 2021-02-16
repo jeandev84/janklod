@@ -259,7 +259,6 @@ class Migrator
 
      /**
       * @param Migration $migration
-      * @throws \ReflectionException
      */
      public function removeMigrationFile(Migration $migration)
      {
@@ -275,7 +274,7 @@ class Migrator
       * @param string $message
       * @return $this
      */
-     public function addMessage(string $message)
+     public function addMessage(string $message): Migrator
      {
           $this->messages[] = $message;
 
@@ -286,7 +285,7 @@ class Migrator
      /**
       * @return array
      */
-     public function getMessages()
+     public function getMessages(): array
      {
          return $this->messages;
      }
@@ -304,10 +303,11 @@ class Migrator
 
 
     /**
+     * @param Migration $migration
      * @return string
      * @throws \ReflectionException
     */
-    public function getFilename(Migration $migration)
+    public function getFilename(Migration $migration): string
     {
          if(method_exists($migration, 'getFilename'))
          {
@@ -321,7 +321,7 @@ class Migrator
     /**
      * @return array
     */
-    public function getMigrationFiles()
+    public function getMigrationFiles(): array
     {
         $migrationFiles = [];
 
@@ -341,7 +341,7 @@ class Migrator
      * @return \ReflectionClass
      * @throws \ReflectionException
     */
-    protected function reflectedClass(string $className)
+    protected function reflectedClass(string $className): \ReflectionClass
     {
         try {
 
