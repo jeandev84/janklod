@@ -9,7 +9,7 @@ use Jan\Component\Database\Migration\Migration;
 $mysqlConfig = [
     'driver' => 'mysql',
     'database' => 'janklod',
-    'host' => '127.0.0.1',
+    'host' => 'localhost',
     'port' => '3306', // 5432
     'username' => 'root',
     'password' => '',

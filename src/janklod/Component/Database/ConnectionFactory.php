@@ -83,6 +83,7 @@ class ConnectionFactory
       {
           $type = $this->getType();
 
+          dump(\PDO::getAvailableDrivers());
           if(! \in_array($type, \PDO::getAvailableDrivers()))
           {
                throw new PDODriverException('driver ('. $type . ') is not available!');
