@@ -231,14 +231,23 @@ class MailerMessage
     }
 
 
-
     /**
      * @param string $body
-     * @return MailerMessage
-     */
-    public function setBody(string $body): MailerMessage
+     * @param string|null $contentType
+     * @param string|null $charset
+     * @return $this
+    */
+    public function setBody(string $body, string $contentType = null, string $charset = null): MailerMessage
     {
         $this->body = $body;
+
+        if($contentType) {
+            $this->setContentType($contentType);
+        }
+
+        if($charset) {
+            $this->setCharset($charset);
+        }
 
         return $this;
     }
