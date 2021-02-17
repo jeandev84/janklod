@@ -2,6 +2,8 @@
 namespace Jan\Component\Service\Mailer;
 
 
+use Jan\Component\Service\Mailer\Contract\HeaderBuilderInterface;
+
 /**
  * Class MailerMessage
  * @package Jan\Component\Service\Mailer
@@ -59,7 +61,7 @@ class MailerMessage
 
 
     /**
-     * @var string[]
+     * @var string
     */
     protected $contentType = 'text/html';
 
@@ -89,6 +91,12 @@ class MailerMessage
     */
     protected $params = [];
 
+
+
+    /**
+     * @var array
+    */
+    protected $headers = [];
 
 
     /**
@@ -233,10 +241,10 @@ class MailerMessage
 
     /**
      * @param string $body
-     * @param string|null $contentType
+     * @param string|null $contentType (text/html)
      * @param string|null $charset
      * @return $this
-    */
+     */
     public function setBody(string $body, string $contentType = null, string $charset = null): MailerMessage
     {
         $this->body = $body;
@@ -254,7 +262,7 @@ class MailerMessage
 
 
     /**
-     * @return string[]
+     * @return string
     */
     public function getContentType()
     {
@@ -341,6 +349,18 @@ class MailerMessage
     public function setParams(array $params): MailerMessage
     {
         $this->params = $params;
+
+        return $this;
+    }
+
+
+    /**
+     * @param HeaderBuilderInterface $header
+     * @return $this
+    */
+    public function setHeader(HeaderBuilderInterface $header)
+    {
+        $this->headers[] = $header;
 
         return $this;
     }
