@@ -46,13 +46,11 @@ class MailerTransport implements MailTransportInterface
       */
       public function __construct($host = '', $port = '')
       {
-            if($host)
-            {
+            if($host) {
                 $this->setHost($host);
             }
 
-            if($port)
-            {
+            if($port) {
                 $this->setPort($port);
             }
       }

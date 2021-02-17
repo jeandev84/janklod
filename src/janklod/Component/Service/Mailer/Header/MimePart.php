@@ -11,10 +11,17 @@ use Jan\Component\Service\Mailer\Contract\HeaderBuilderInterface;
 class MimePart implements HeaderBuilderInterface
 {
 
-     protected $contentType;
+     /**
+      * @var string
+     */
+     protected $contentType = 'text/html';
 
 
-     protected $charset;
+     /**
+      * @var string
+     */
+     protected $charset = 'UTF-8';
+
 
 
      /**
@@ -28,6 +35,10 @@ class MimePart implements HeaderBuilderInterface
          $this->charset = $charset;
      }
 
+
+     /**
+       * string
+     */
      public function build()
      {
         // TODO: Implement build() method.

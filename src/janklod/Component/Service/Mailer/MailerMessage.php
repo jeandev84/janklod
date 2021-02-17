@@ -366,6 +366,12 @@ class MailerMessage
     }
 
 
+    public function buildHeaders()
+    {
+
+    }
+
+
     /**
      * @return string
     */
