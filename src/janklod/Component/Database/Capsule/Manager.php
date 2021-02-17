@@ -43,6 +43,20 @@ class Manager
     }
 
 
+    /**
+     * @return Exception|DatabaseManager
+     * @throws Exception
+    */
+    public function create()
+    {
+        if(! $this->configParams)
+        {
+            return new Exception('no connection added.');
+        }
+
+        return new DatabaseManager($this->configParams);
+    }
+
 
     /**
      * @return void
@@ -50,11 +64,11 @@ class Manager
     */
     public function setAsGlobal()
     {
-        if(! self::$instance && $this->configParams)
+        if(! self::$instance)
         {
-            $manager = new DatabaseManager($this->configParams);
-            self::$instance = $manager;
+            $manager = $this->create();
             $this->setManager($manager);
+            self::$instance = $manager;
         }
     }
 
