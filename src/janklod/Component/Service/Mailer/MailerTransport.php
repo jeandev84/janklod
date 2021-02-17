@@ -2,7 +2,7 @@
 namespace Jan\Component\Service\Mailer;
 
 
-use Jan\Component\Mailer\Contract\MailTransportInterface;
+use Jan\Component\Service\Mailer\Contract\MailTransportInterface;
 
 
 
@@ -69,16 +69,16 @@ class MailerTransport implements MailTransportInterface
 
 
 
-    /**
-     * @param string $host
-     * @return MailerTransport
-    */
-    public function setHost(string $host): MailerTransport
-    {
-        $this->host = $host;
+     /**
+      * @param string $host
+      * @return MailerTransport
+     */
+     public function setHost(string $host): MailerTransport
+     {
+         $this->host = $host;
 
-        return $this;
-    }
+         return $this;
+     }
 
 
 

@@ -2,7 +2,7 @@
 
 /* ALTER DATABASE dbname CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; */
 
-
+/* dd(phpinfo()); */
 use Jan\Component\Database\Capsule\Manager;
 use Jan\Component\Database\Migration\Migration;
 
@@ -38,3 +38,6 @@ try {
 
 
 dd(__FILE__, __LINE__);
+
+
+die;

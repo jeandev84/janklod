@@ -2,7 +2,7 @@
 namespace Jan\Component\Service\Mailer;
 
 
-use Jan\Component\Mailer\Contract\MailTransportInterface;
+use Jan\Component\Service\Mailer\Contract\MailTransportInterface;
 
 
 /**
@@ -53,7 +53,7 @@ class Mailer
 
 
          // send mail to user
-         $success = mail(
+         $status = mail(
              $message->getTo(),
              $message->getSubject(),
              $message->getBody(),
@@ -61,7 +61,10 @@ class Mailer
              $message->getParams()
          );
 
-         if(! $success)
+         $errorMessage = null;
+         $errorLast = [];
+
+         if(! $status)
          {
              if($errorLast = error_get_last())
              {
