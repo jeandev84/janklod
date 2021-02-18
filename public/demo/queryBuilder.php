@@ -38,6 +38,3 @@ try {
 
 
 dd(__FILE__, __LINE__);
-
-
-die;
