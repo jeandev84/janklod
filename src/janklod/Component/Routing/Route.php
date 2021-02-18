@@ -120,6 +120,15 @@ class Route
 
 
       /**
+       * @return string
+      */
+      public function getResolvedPath(): string
+      {
+          return $this->removeTrailingSlashes($this->path);
+      }
+
+
+      /**
        * set route path
        *
        * @param string $path
@@ -199,40 +208,18 @@ class Route
       {
           $name = $this->prefixName . $name;
 
-          if(static::exists($name))
+          if(RouteCollection::exists($name))
           {
               throw new \RuntimeException(
                   sprintf('This route name (%s) already taken!', $name)
               );
           }
 
-          static::$namedRoutes[$name] = $this;
+          RouteCollection::setNamedRoute($name, $this);
 
           $this->name = $name;
 
           return $this;
-      }
-
-
-
-
-      /**
-       * @param $name
-       * @return bool
-      */
-      public static function exists(string $name): bool
-      {
-          return \array_key_exists($name, static::$namedRoutes);
-      }
-
-
-      /**
-        * @param $name
-        * @return Route
-      */
-      public static function retrieve(string $name): Route
-      {
-          return static::$namedRoutes[$name];
       }
 
 
@@ -243,12 +230,12 @@ class Route
       */
       public static function generate(string $name, array $params = [])
       {
-           if(! static::exists($name))
+           if(! RouteCollection::exists($name))
            {
                 return false;
            }
 
-           return static::retrieve($name)->convertParams($params);
+           return RouteCollection::retrieve($name)->convertParams($params);
       }
 
 
@@ -345,9 +332,9 @@ class Route
      /**
       * @return string
      */
-     public function getMethodsAsString($separator = '|')
+     public function getMethodsToString($separator = '|'): string
      {
-         return implode($separator, $this->getMethod());
+         return implode($separator, $this->getMethods());
      }
 
 
@@ -480,7 +467,7 @@ class Route
     */
     public function matchPath(string $path): bool
     {
-        if(preg_match($pattern = $this->generatePattern(), $this->resolvePath($path), $matches))
+        if(preg_match($pattern = $this->generatePattern(), $this->resolveURL($path), $matches))
         {
             $this->matches = $this->filterParams($matches);
 
@@ -529,24 +516,25 @@ class Route
     */
     protected function generatePattern(string $flag = 'i'): string
     {
-        $path = $this->getPath();
+        $pattern = $this->getResolvedPath();
 
         if($patterns = $this->resolvePatterns())
         {
             foreach($patterns as $k => $v)
             {
-                $path = preg_replace(["#{{$k}}#", "#{{$k}.?}#"], [$v, '?'. $v .'?'], $path);
+                $pattern = preg_replace(["#{{$k}}#", "#{{$k}.?}#"], [$v, '?'. $v .'?'], $pattern);
             }
         }
 
-        return '#^'. $this->removeTrailingSlashes($path) .'$#'. $flag;
+        return '#^'. $pattern .'$#'. $flag;
     }
+
 
 
     /**
      * @return array
     */
-    protected function resolvePatterns(): array
+    public function resolvePatterns(): array
     {
         $patterns = [];
 
@@ -562,13 +550,14 @@ class Route
     }
 
 
+
     /**
      * Convert path params
      *
      * @param array $params
      * @return string|string[]|null
     */
-    protected function convertParams(array $params = [])
+    public function convertParams(array $params = [])
     {
         $path = $this->getPath();
 
@@ -589,7 +578,7 @@ class Route
      * @param string $path
      * @return string
     */
-    protected function resolvePath(string $path): string
+    protected function resolveURL(string $path): string
     {
         if(stripos($path, '?') !== false)
         {

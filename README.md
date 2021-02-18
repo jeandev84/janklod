@@ -67,6 +67,7 @@ git branch -M main
 git remote add origin https://github.com/jeandev84/janklod.git
 git push -u origin main
 ```
+
 8. PHP install 7.2
 ```
 21
@@ -113,4 +114,24 @@ $ exit
 ---------------------------------------------
 https://askubuntu.com/questions/999999/php-with-pdo-mysql-in-ubuntu-16-04
 https://www.vultr.com/docs/configure-php-7-2-on-ubuntu-18-04
+```
+
+9. Install MYSQL and PostgreSQL (mysql / pgsql) for php 7.2 example 
+```
+sudo apt-get install php7.2-pgsql
+sudo apt-get install php7.2-mysql
+sudo apt-get install php7.2-xml
+sudo apt-get install php-xml
+sudo apt-get install php-intl
+```
+
+10. Install dev packages
+```
+sudo apt-get install php5-dev (for php 5)
+sudo apt-get install php7-dev (for php 7)
+```
+
+11. PHP ini
+```
+https://devanswers.co/ubuntu-php-php-ini-configuration-file/#:~:text=On%20Apache%2C%20php.,ini%20.
 ```

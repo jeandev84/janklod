@@ -1,5 +1,5 @@
 <?php
-namespace Jan\Foundation\Command\Maker;
+namespace Jan\Foundation\Command\Make;
 
 
 use Jan\Component\Console\Command\Command;
@@ -8,38 +8,32 @@ use Jan\Component\Console\Output\Contract\OutputInterface;
 
 
 /**
- * Class MakeMigrationCommand
+ * Class MakeControllerCommand
+ *
  * @package Jan\Foundation\Commands\Maker
 */
-class MakeMigrationCommand extends Command
+class MakeControllerCommand extends Command
 {
-    /**
-     * @var string
-    */
-    protected $name = 'make:migration';
-
-
 
     /**
      * @var string
     */
-    protected $description = "make migration class ...";
+    protected $name = 'make:controller';
 
 
+    /**
+     * @var string
+    */
+    protected $description = "make controller class ...";
 
 
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return OutputInterface
+     * @return mixed|void
     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        /*
-        $argumentName = $input->getArgument('test');
-        dd($argumentName);
-        */
-
-        return $output->write('Make migration');
+        dump(__METHOD__);
     }
 }

@@ -18,7 +18,6 @@ class Router implements RouterInterface
 
     use UrlGeneratorTrait;
 
-
     const KEY_OPTION_PARAM_PATH_PREFIX  = 'path.prefix';
     const KEY_OPTION_PARAM_NAMESPACE    = 'namespace';
     const KEY_OPTION_PARAM_NAME_PREFIX  = 'name.prefix';
@@ -27,14 +26,6 @@ class Router implements RouterInterface
     const OPTION_PARAM_NAMESPACE        = 'namespace';
     const OPTION_PARAM_MIDDLEWARE       = 'middleware';
     const OPTION_PARAM_NAME_PREFIX      = 'name';
-
-
-    const ALLOWED_OPTION_PARAMS = [
-        self::OPTION_PARAM_PATH_PREFIX,
-        self::OPTION_PARAM_NAMESPACE,
-        self::OPTION_PARAM_MIDDLEWARE,
-        self::OPTION_PARAM_NAME_PREFIX
-    ];
 
 
 
@@ -60,6 +51,13 @@ class Router implements RouterInterface
      * @var array
     */
     protected $options = [];
+
+
+
+    /**
+     * @var array
+    */
+    protected $resources = [];
 
 
 
@@ -126,15 +124,14 @@ class Router implements RouterInterface
     /**
      * @return array
     */
-    public function groupRoutes()
+    public function getGroupRoutes(): array
     {
          $routes = [];
 
          foreach ($this->routes as $route)
          {
              /** @var Route $route */
-
-             $routes[$route->getMethodsAsString()][] = $route;
+             $routes[$route->getMethodsToString()][] = $route;
          }
 
          return $routes;
@@ -291,12 +288,25 @@ class Router implements RouterInterface
     */
     public function resource(string $path, string $controller, string $prefixName = ''): Router
     {
+         //TODO Refactoring
          $this->get($path. '/', $controller . '@index', $prefixName. 'list');
          $this->get($path. '/{id}', $controller . '@show', $prefixName. 'show');
          $this->map( 'GET|POST', $path . '/new', $controller. '@new', $prefixName. 'new');
          $this->map( 'GET|POST', $path . '/{id}/edit', $controller. '@edit', $prefixName. 'edit');
          $this->delete($path . '/{id}/delete', $controller. '@delete', $prefixName. 'delete');
          $this->get($path . '/{id}/restore', $controller. '@restore', $prefixName. 'restore');
+
+         $this->resources[$path] = [
+             'GET' => [
+
+             ],
+             'GET|POST' => [
+
+             ],
+             'DELETE' => [
+
+             ]
+         ];
 
          return $this;
     }
@@ -561,9 +571,22 @@ class Router implements RouterInterface
     */
     protected function isValidOption($indexOption): bool
     {
-        return \in_array($indexOption, static::ALLOWED_OPTION_PARAMS);
+        return \in_array($indexOption, $this->getAllowedOptionParams());
     }
 
+
+    /**
+     * @return string[]
+    */
+    protected function getAllowedOptionParams(): array
+    {
+        return [
+            self::OPTION_PARAM_PATH_PREFIX,
+            self::OPTION_PARAM_NAMESPACE,
+            self::OPTION_PARAM_MIDDLEWARE,
+            self::OPTION_PARAM_NAME_PREFIX
+        ];
+    }
 
     /**
      * @return string[]

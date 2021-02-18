@@ -1,11 +1,11 @@
 <?php
-namespace Jan\Foundation\Command\Traits;
+namespace Jan\Foundation\Generator\Traits;
 
 
 /**
  * Trait StubGenerator
  *
- * @package Jan\Foundation\Command\Traits
+ * @package Jan\Foundation\Generator\Traits
  */
 trait StubGenerator
 {

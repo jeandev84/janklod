@@ -10,8 +10,8 @@ use Jan\Component\Console\Input\Contract\InputInterface;
 use Jan\Component\Console\Output\Contract\OutputInterface;
 use Jan\Contract\Console\Kernel as ConsoleKernelContract;
 use Jan\Foundation\Application;
-use Jan\Foundation\Command\Maker\MakeControllerCommand;
-use Jan\Foundation\Command\Maker\MakeMigrationCommand;
+use Jan\Foundation\Command\Make\MakeControllerCommand;
+use Jan\Foundation\Command\Make\MakeMigrationCommand;
 
 
 /**

@@ -3,12 +3,8 @@ namespace Jan\Foundation;
 
 
 use Exception;
-use Jan\Component\Console\Input\Contract\InputInterface;
 use Jan\Component\Container\Container;
 use Jan\Component\Container\Contract\ContainerInterface;
-use Jan\Component\Database\Contract\ManagerInterface;
-use Jan\Component\Database\Database;
-use Jan\Component\Database\Schema;
 use Jan\Component\Dotenv\Dotenv;
 use Jan\Component\Http\Request;
 use Jan\Component\Http\Response;
@@ -55,6 +51,17 @@ class Application extends Container
       protected $basePath;
 
 
+      /**
+       * @var array
+      */
+      protected $serviceProviders = [];
+
+
+      /**
+       * @var array
+      */
+      protected $facades = [];
+
 
       /**
        * Application constructor.
@@ -90,6 +97,7 @@ class Application extends Container
 
            return $this;
       }
+
 
 
       /**
@@ -182,17 +190,7 @@ class Application extends Container
       protected function registerBaseServiceProviders()
       {
           // register base service providers
-          $this->registerProviders([
-            FileSystemServiceProvider::class,
-            ConfigurationServiceProvider::class,
-            AppServiceProvider::class,
-            DatabaseServiceProvider::class,
-            ConsoleServiceProvider::class,
-            MiddlewareServiceProvider::class,
-            RouteServiceProvider::class,
-            AssetServiceProvider::class,
-            ViewServiceProvider::class
-          ]);
+          $this->registerProviders(ApplicationStorage::providers());
     }
 
 

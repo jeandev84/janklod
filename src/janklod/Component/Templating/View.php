@@ -97,7 +97,7 @@ class View implements ViewInterface
       */
       public function renderHtml()
       {
-           $template = $this->toFilename($this->template);
+           $template = $this->resourceTemplate($this->template);
 
            if(! file_exists($template))
            {
@@ -134,9 +134,9 @@ class View implements ViewInterface
       * @param string $template
       * @return string
      */
-     protected function toFilename(string $template)
+     public function resourceTemplate(string $template)
      {
-         return $this->resource . DIRECTORY_SEPARATOR . $this->resolvedTemplate($template);
+         return $this->resource . DIRECTORY_SEPARATOR . $this->resolveTemplatePath($template);
      }
 
 
@@ -144,7 +144,7 @@ class View implements ViewInterface
       * @param $template
       * @return string|string[]
      */
-     protected function resolvedTemplate($template)
+     protected function resolveTemplatePath($template)
      {
          return str_replace(['\\', '/'], DIRECTORY_SEPARATOR, ltrim($template, '\\/'));
      }

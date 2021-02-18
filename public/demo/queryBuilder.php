@@ -6,6 +6,37 @@
 use Jan\Component\Database\Capsule\Manager;
 use Jan\Component\Database\Migration\Migration;
 
+//$pgsqlConfig = [
+//    'driver' => 'pgsql',
+//    'database' => 'janklod',
+//    'host' => 'localhost',
+//    'port' => '5432', // 3306
+//    'username' => 'postgres',
+//    'password' => '123456',
+//    //'collation' => 'utf8mb4_unicode_ci', // utf8_general_ci
+//    //'charset' => 'utf8mb4', // utf8
+//    'prefix' => '', // jan_
+//    'engine' => 'InnoDB', // MyISAM
+//    'options' => [],
+//];
+//
+//
+//try {
+//    $capsule = new Manager();
+//    $capsule->addConnection($pgsqlConfig);
+//    $capsule->setAsGlobal();
+//
+//    /*
+//    $pdoConnection = Manager::getInstance()->getPDO();
+//    $pdo = $pdoConnection->getConnection();
+//    */
+//
+//} catch (Exception $e) {
+//    throw $e;
+//}
+
+
+
 $mysqlConfig = [
     'driver' => 'mysql',
     'database' => 'janklod',
@@ -19,7 +50,6 @@ $mysqlConfig = [
     'engine' => 'InnoDB', // MyISAM
     'options' => [],
 ];
-
 
 
 try {
@@ -37,4 +67,5 @@ try {
 }
 
 
-dd(__FILE__, __LINE__);
+dump(Manager::getInstance());
+//dd(__FILE__, __LINE__);
