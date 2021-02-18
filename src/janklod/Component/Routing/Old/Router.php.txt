@@ -68,18 +68,17 @@ class Router implements RouterInterface
     protected $resources = [];
 
 
+
     /**
      * Router constructor.
      *
-     * @param RouteCollection|null $routeCollection
-     */
-    public function __construct(RouteCollection $routeCollection = null)
+     * @param string $baseUrl
+    */
+    public function __construct(string $baseUrl = '')
     {
-         if(! $routeCollection) {
-             $routeCollection = new RouteCollection();
+         if($baseUrl) {
+             $this->setBaseURL($baseUrl);
          }
-
-         $this->routeCollection = $routeCollection;
     }
 
 
@@ -112,7 +111,7 @@ class Router implements RouterInterface
     */
     public function add(Route $route): Router
     {
-         $this->routeCollection->add($route);
+         $this->routes[] = $route;
 
          return $this;
     }
@@ -126,7 +125,7 @@ class Router implements RouterInterface
     */
     public function getRoutes(): array
     {
-        return $this->routeCollection->getRoutes();
+        return $this->routes;
     }
 
 
@@ -137,13 +136,23 @@ class Router implements RouterInterface
     {
          $routes = [];
 
-         foreach ($this->getRoutes() as $route)
+         foreach ($this->routes as $route)
          {
              /** @var Route $route */
              $routes[$route->getMethodsToString()][] = $route;
          }
 
          return $routes;
+    }
+
+
+
+    /**
+     * @return array
+    */
+    public function namedRoutes()
+    {
+        return Route::$namedRoutes;
     }
 
 
@@ -157,7 +166,7 @@ class Router implements RouterInterface
     */
     public function map($methods, string $path, $target, string $name = null): Route
     {
-        /* resolve given params */
+        // resolve given params
         $methods    = $this->resolveMethods($methods);
         $path       = $this->resolvePath($path);
         $target     = $this->resolveTarget($target);
@@ -165,33 +174,30 @@ class Router implements RouterInterface
         $prefixName = $this->getOption(static::OPTION_PARAM_NAME_PREFIX, '');
 
 
-        /* create new instance of route */
+        // create new instance of route
         $route = new Route($methods, $path, $target, $prefixName);
 
-
-        /* set middleware */
+        // set middleware
         $route->middleware($middleware);
 
-
-        /* set options */
+        // set options
         $route->addOptions($this->routeOptionParameters());
 
-
-        /* set name */
-        if($name) {
+        // set name
+        if($name)
+        {
             $route->name($name);
         }
 
-
-        /* set globals patterns */
+        // set globals patterns
         $route->where($this->patterns);
 
 
-        /* add route */
+        // add route
         $this->add($route);
 
 
-        /* return current route */
+        // return current route
         return $route;
     }
 
@@ -204,7 +210,7 @@ class Router implements RouterInterface
     */
     public function match(string $requestMethod, string $requestUri)
     {
-        foreach ($this->getRoutes() as $route)
+        foreach ($this->routes as $route)
         {
             if($route->match($requestMethod, $requestUri))
             {
@@ -619,5 +625,5 @@ class Router implements RouterInterface
 
         return $parameters;
     }
-    
+
 }

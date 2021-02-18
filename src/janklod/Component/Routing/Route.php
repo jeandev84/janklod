@@ -223,22 +223,6 @@ class Route
       }
 
 
-      /**
-       * @param string $name
-       * @param array $params
-       * @return false|string|string[]|null
-      */
-      public static function generate(string $name, array $params = [])
-      {
-           if(! RouteCollection::exists($name))
-           {
-                return false;
-           }
-
-           return RouteCollection::retrieve($name)->convertParams($params);
-      }
-
-
 
       /**
        * get route params
@@ -330,6 +314,7 @@ class Route
 
 
      /**
+      * @param string $separator
       * @return string
      */
      public function getMethodsToString($separator = '|'): string

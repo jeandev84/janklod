@@ -87,4 +87,21 @@ class RouteCollection
       {
           return static::$namedRoutes[$name];
       }
+
+
+
+      /**
+       * @param $name
+       * @param array $params
+       * @return false|string|string[]|null
+      */
+      public static function generate($name, $params = [])
+      {
+          if(! static::exists($name))
+          {
+              return false;
+          }
+
+          return static::retrieve($name)->convertParams($params);
+      }
 }

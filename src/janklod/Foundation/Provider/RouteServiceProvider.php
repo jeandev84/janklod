@@ -24,7 +24,10 @@ class RouteServiceProvider extends ServiceProvider implements BootableServicePro
     public function boot()
     {
         $this->app->singleton(Router::class, function (Config $config) {
-            return new Router($config->get('app.baseUrl'));
+            $router = new Router();
+            $router->setBaseURL($config->get('app.baseUrl'));
+
+            return $router;
         });
     }
 
