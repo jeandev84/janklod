@@ -87,10 +87,7 @@ class Router implements RouterInterface
         /** @var Route $route */
         foreach ($routes as $route)
         {
-            if($route instanceof Route)
-            {
-                $this->add($route);
-            }
+            $this->add($route);
         }
 
         return $this;
@@ -135,6 +132,27 @@ class Router implements RouterInterface
          }
 
          return $routes;
+    }
+
+
+
+    /**
+     * @return array
+    */
+    public function getResources(): array
+    {
+        return $this->resources;
+    }
+
+
+
+    /**
+     * @param string $controller
+     * @return array|mixed
+    */
+    public function getResource(string $controller): array
+    {
+        return $this->resources[$controller] ?? [];
     }
 
 
@@ -276,30 +294,38 @@ class Router implements RouterInterface
     /**
      * @param string $path
      * @param string $controller
-     * @param string $prefixName
      * @return Router
     */
-    public function resource(string $path, string $controller, string $prefixName = ''): Router
+    public function resource(string $path, string $controller): Router
     {
-         //TODO Refactoring
-         $this->get($path. '/', $controller . '@index', $prefixName. 'list');
-         $this->get($path. '/{id}', $controller . '@show', $prefixName. 'show');
-         $this->map( 'GET|POST', $path . '/new', $controller. '@new', $prefixName. 'new');
-         $this->map( 'GET|POST', $path . '/{id}/edit', $controller. '@edit', $prefixName. 'edit');
-         $this->delete($path . '/{id}/delete', $controller. '@delete', $prefixName. 'delete');
-         $this->get($path . '/{id}/restore', $controller. '@restore', $prefixName. 'restore');
+         $prefixed = trim($path, '/') . '.';
 
-         $this->resources[$path] = [
+         $resources = [
              'GET' => [
-
+                ['path' => $path.'/', 'action' => 'index', $prefixed.'list'],
+                ['path' => $path.'/{id}', 'action' => 'show', $prefixed.'show'],
+                ['path' => $path.'/{id}/restore', 'action' => 'restore', $prefixed.'restore'],
              ],
              'GET|POST' => [
-
+                ['path' => $path.'/new', 'action' => 'edit', $prefixed.'new'],
+                ['path' => $path.'/{id}/edit', 'action' => 'delete', $prefixed.'edit'],
              ],
              'DELETE' => [
-
+                ['path' => $path.'/{id}/delete', 'action' => 'delete', $prefixed.'delete'],
              ]
          ];
+
+
+         foreach ($resources as $methods => $routes)
+         {
+             foreach ($routes as $route)
+             {
+                 list($path, $action, $name) = array_values($route);
+                 $this->map($methods, $path, $controller .'@'. $action, $name);
+             }
+         }
+
+         $this->resources[$controller] = $resources;
 
          return $this;
     }
@@ -400,6 +426,7 @@ class Router implements RouterInterface
 
          $this->group($closure, $options);
     }
+
 
 
     /**
