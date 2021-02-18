@@ -30,15 +30,6 @@ class Router implements RouterInterface
 
 
     /**
-     * route collection
-     *
-     * @var array
-    */
-    protected $routes = [];
-
-
-
-    /**
      * @var RouteCollection
     */
     protected $routeCollection;
