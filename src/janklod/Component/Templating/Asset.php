@@ -38,8 +38,7 @@ class Asset
      */
      public function __construct(string $baseUrl = '')
      {
-          if($baseUrl)
-          {
+          if($baseUrl) {
               $this->setBaseUrl($baseUrl);
           }
      }
