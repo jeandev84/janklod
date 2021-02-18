@@ -23,10 +23,9 @@ class UrlGenerator implements UrlGeneratorInterface
       protected $router;
 
 
-
       /**
        * UrlGenerator constructor.
-       * @param string $baseUrl
+       * @param RouterInterface $router
       */
       public function __construct(RouterInterface $router)
       {
@@ -34,14 +33,13 @@ class UrlGenerator implements UrlGeneratorInterface
       }
 
 
-
       /**
        * @param string $name
        * @param array $params
+       * @param int|null $mode [ URL_ABSOLUTE, URL_PATH ]
        * @return string
-       * @throws \Exception
       */
-      public function generate(string $name, array $params = []): string
+      public function generate(string $name, array $params = [], int $mode = null): string
       {
           return $this->router->generate($name, $params);
       }

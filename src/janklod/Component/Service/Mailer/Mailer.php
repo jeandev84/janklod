@@ -72,11 +72,11 @@ class Mailer
                  dd($errorMessage);
              }
 
-             dd('message no sent');
+             dump('message no sent', 'false');
              return false;
          }
 
-         dd('message sent');
+         dump('message sent', 'true');
          return true;
      }
 }

@@ -28,7 +28,7 @@ trait UploadStatus
      * @param int $code
      * @return string
     */
-    public function getErrorMessage(int $code)
+    public function getErrorMessage(int $code): string
     {
         return $this->errorMessages[$code] ?? '';
     }
