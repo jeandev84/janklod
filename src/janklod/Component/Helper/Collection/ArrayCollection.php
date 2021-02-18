@@ -34,6 +34,26 @@ class ArrayCollection implements \ArrayAccess, \Iterator
 
 
     /**
+     * @param $key
+     * @return mixed
+    */
+    public function get($key)
+    {
+        return $this->items[$key];
+    }
+
+
+    /**
+     * @param $key
+    */
+    public function remove($key)
+    {
+        unset($this->items[$key]);
+    }
+
+
+
+    /**
      * Determine if has given param in items
      * @param $key
      * @return bool
@@ -70,21 +90,21 @@ class ArrayCollection implements \ArrayAccess, \Iterator
 
     public function offsetExists($offset)
     {
-        // TODO: Implement offsetExists() method.
+        return $this->contains($offset);
     }
 
     public function offsetGet($offset)
     {
-        // TODO: Implement offsetGet() method.
+        return $this->get($offset);
     }
 
     public function offsetSet($offset, $value)
     {
-        // TODO: Implement offsetSet() method.
+        $this->add($offset, $value);
     }
 
     public function offsetUnset($offset)
     {
-        // TODO: Implement offsetUnset() method.
+        $this->remove($offset);
     }
 }

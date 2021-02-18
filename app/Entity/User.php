@@ -2,6 +2,8 @@
 namespace App\Entity;
 
 
+use Jan\Component\Helper\Collection\ArrayCollection;
+
 /**
  * Class User
  * @package App\Entity
@@ -83,10 +85,19 @@ class User
 
 
       /**
+       * OneToMany
+       * @var Product[]
+      */
+      private $products = [];
+
+
+
+      /**
        * User constructor.
       */
       public function __construct()
       {
+          $this->products = new ArrayCollection();
       }
 
 
@@ -99,22 +110,9 @@ class User
       }
 
 
-     /**
-      * @param int $id
-      *
-      * @return User
-     */
-     public function setId(int $id): User
-     {
-        $this->id = $id;
-
-        return $this;
-     }
-
-
-     /**
-      * @return string
-     */
+      /**
+       * @return string
+      */
       public function getEmail(): string
       {
           return $this->email;
@@ -151,6 +149,7 @@ class User
     public function setSurname(string $surname): User
     {
         $this->surname = $surname;
+
         return $this;
     }
 
@@ -283,8 +282,42 @@ class User
     {
         $this->sex = $sex;
 
-
         return $this;
     }
 
+
+
+    /**
+     * @param Product $product
+     * @return User
+    */
+    public function addProduct(Product $product): User
+    {
+         if(! $this->products->contains($product))
+         {
+              $this->products[] = $product;
+              $product->setUser($this);
+         }
+
+         return $this;
+    }
+
+
+
+    /**
+     * @param Product $product
+    */
+    public function removeProduct(Product $product)
+    {
+         // remove product
+    }
+
+
+    /**
+     * @return Product[]|ArrayCollection
+    */
+    public function getProducts()
+    {
+        return $this->products;
+    }
 }

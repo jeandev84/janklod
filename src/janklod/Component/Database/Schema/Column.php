@@ -62,17 +62,18 @@ class Column
       }
 
 
-    /**
-     * add interphases
-     * If $this->collation('utf8_unicode'),
-     *
-     * @param string $collation
-     * @return self
-    */
-    public function collation($collation): Column
-    {
-        return $this->setOption('collation', $collation);
-    }
+
+      /**
+       * add interphases
+       * If $this->collation('utf8_unicode'),
+       *
+       * @param string $collation
+       * @return self
+      */
+      public function collation($collation): Column
+      {
+          return $this->setOption('collation', $collation);
+      }
 
 
     /**
@@ -85,6 +86,7 @@ class Column
     }
 
 
+
     /**
      * Get column name
      *
@@ -94,6 +96,7 @@ class Column
     {
         return $this->getOption('name');
     }
+
 
 
     /**

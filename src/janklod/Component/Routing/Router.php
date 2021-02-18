@@ -298,34 +298,36 @@ class Router implements RouterInterface
     */
     public function resource(string $path, string $controller): Router
     {
-         $prefixed = trim($path, '/') . '.';
+         $prefixName = trim($path, '/') . '.';
 
          $resources = [
              'GET' => [
-                ['path' => $path.'/', 'action' => 'index', $prefixed.'list'],
-                ['path' => $path.'/{id}', 'action' => 'show', $prefixed.'show'],
-                ['path' => $path.'/{id}/restore', 'action' => 'restore', $prefixed.'restore'],
+                ['', 'index', 'list'],
+                ['{id}', 'show', 'show'],
+                ['{id}/restore', 'restore', 'restore'],
              ],
              'GET|POST' => [
-                ['path' => $path.'/new', 'action' => 'edit', $prefixed.'new'],
-                ['path' => $path.'/{id}/edit', 'action' => 'delete', $prefixed.'edit'],
+                ['new', 'edit', 'new'],
+                ['{id}/edit', 'edit', 'edit'],
              ],
              'DELETE' => [
-                ['path' => $path.'/{id}/delete', 'action' => 'delete', $prefixed.'delete'],
+                ['{id}/delete', 'delete', 'delete'],
              ]
          ];
 
 
+         $resourceActions = ['index', 'show', 'restore', 'new', 'edit', 'delete'];
+
          foreach ($resources as $methods => $routes)
          {
-             foreach ($routes as $route)
+             foreach ($routes as $routeItems)
              {
-                 list($path, $action, $name) = array_values($route);
-                 $this->map($methods, $path, $controller .'@'. $action, $name);
+                 list($pathSuffix, $action, $name) = $routeItems;
+                 $this->map($methods, $path. '/'. $pathSuffix, $controller .'@'. $action, $prefixName.$name);
              }
          }
 
-         $this->resources[$controller] = $resources;
+         $this->resources[$controller] = $resourceActions;
 
          return $this;
     }
