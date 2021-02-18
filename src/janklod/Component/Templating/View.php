@@ -43,8 +43,7 @@ class View implements ViewInterface
       */
       public function __construct(string $resource = '')
       {
-           if($resource)
-           {
+           if($resource) {
                $this->resource($resource);
            }
       }
