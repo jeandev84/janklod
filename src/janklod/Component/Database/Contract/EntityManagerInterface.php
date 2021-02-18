@@ -2,8 +2,8 @@
 namespace Jan\Component\Database\Contract;
 
 
+use Jan\Component\Database\Canon\ORM\Repository\ServiceRepository;
 use Jan\Component\Database\Configuration;
-use Jan\Component\Database\ORM\Repository\ServiceRepository;
 
 
 /**
@@ -25,11 +25,11 @@ interface EntityManagerInterface extends ObjectManager
      /**
       * Map entity with repository
       *
-      * @param string $entityName
-      * @param ServiceRepository $repository
+      * @param string $entityClass
+      * @param ServiceRepository $repositoryObject
       * @return mixed
      */
-     public function map(string $entityName, ServiceRepository $repository);
+     public function map(string $entityClass, ServiceRepository $repositoryObject);
 
 
 

@@ -7,6 +7,7 @@ use Jan\Component\Database\ConnectionTrait;
 use Jan\Component\Database\Contract\ManagerInterface;
 use Jan\Component\Database\Contract\SQLQueryBuilder;
 use Jan\Component\Database\EntityTrait;
+use Jan\Component\Database\ObjectMap;
 
 
 /**
@@ -16,7 +17,7 @@ use Jan\Component\Database\EntityTrait;
 class EntityRepository
 {
 
-    use ConnectionTrait, EntityTrait;
+    use ConnectionTrait, EntityTrait, ObjectMap;
 
 
     /**
@@ -122,4 +123,29 @@ class EntityRepository
 //     {
 //        parent::findBy(['id' => $id]);
 //     }
+
+
+      /**
+       * @param $calledMethod
+       * @param $arguments
+       * @throws \ReflectionException
+      */
+      public function __call($calledMethod, $arguments)
+      {
+          $reflectedClass = new \ReflectionClass($this->entityClass);
+          $methods = $reflectedClass->getMethods();
+          $properties = $reflectedClass->getProperties();
+
+          if (preg_match('#^'. $calledMethod .'$#i', 'findBy')) {
+              list($method, $property) = explode('findBy', $calledMethod, 2);
+
+              $this->findBy([$property => $arguments]);
+          }
+
+          if (preg_match('#^'. $calledMethod .'$#i', 'findOneBy')) {
+              list($method, $property) = explode('findOneBy', $calledMethod, 2);
+
+              $this->findBy([$property => $arguments]);
+          }
+      }
 }

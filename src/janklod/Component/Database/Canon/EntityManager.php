@@ -54,22 +54,22 @@ class EntityManager implements EntityManagerInterface
     /**
      * Map entity class
      *
-     * @param string $entityName
-     * @param ServiceRepository $repository
+     * @param string $entityClass
+     * @param ServiceRepository $repositoryObject
     */
-    public function map(string $entityName, ServiceRepository $repository)
+    public function map(string $entityClass, ServiceRepository $repositoryObject)
     {
-        $this->entityMapped[$entityName] = $repository;
+        $this->entityMapped[$entityClass] = $repositoryObject;
     }
 
 
     /**
-     * @param string $entityName
+     * @param string $entityClass
      * @return bool
     */
-    public function mapped(string $entityName): bool
+    public function mapped(string $entityClass): bool
     {
-         return isset($this->entityMapped[$entityName]);
+         return isset($this->entityMapped[$entityClass]);
     }
 
 
@@ -79,9 +79,9 @@ class EntityManager implements EntityManagerInterface
     */
     public function mapEntityClasses(array $entities)
     {
-        foreach ($entities as $entityName => $repository)
+        foreach ($entities as $entityClass => $repositoryObject)
         {
-             $this->map($entityName, $repository);
+             $this->map($entityClass, $repositoryObject);
         }
     }
 
@@ -145,11 +145,11 @@ class EntityManager implements EntityManagerInterface
 
         $repositories = [];
 
-        foreach ($entities as $entityName)
+        foreach ($entities as $entityClass)
         {
             $app = new \stdClass(); // replace to class container Container
-            $repositoryName = str_replace("App\\Entity\\", "App\\Repository\\", $entityName."Repository");
-            $repositories[$entityName] = $app->get($repositoryName);
+            $repositoryClass = str_replace("App\\Entity\\", "App\\Repository\\", $entityClass."Repository");
+            $repositories[$entityClass] = $app->get($repositoryClass);
         }
 
         dump($repositories);
