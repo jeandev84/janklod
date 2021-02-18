@@ -6,7 +6,7 @@ use Jan\Component\Http\Bag\FileBag;
 use Jan\Component\Http\Bag\HeaderBag;
 use Jan\Component\Http\Bag\ParameterBag;
 use Jan\Component\Http\Bag\ServerBag;
-use Jan\Component\Http\Cookie\Cookie;
+use Jan\Component\Http\Cookie\CookieJar;
 use Jan\Component\Http\Session\Session;
 
 
@@ -46,7 +46,7 @@ class Request
 
     /**
      * Get parameters from cookies $_COOKIES
-     * @var Cookie
+     * @var CookieJar
     */
     public $cookies;
 
@@ -260,7 +260,7 @@ class Request
         $this->queryParams = new ParameterBag($queryParams);
         $this->request     = new ParameterBag($request);
         $this->attributes  = new ParameterBag($attributes);
-        $this->cookies     = new Cookie($cookies);
+        $this->cookies     = new CookieJar($cookies);
         $this->files       = new FileBag($files);
         $this->server      = new ServerBag($server);
         $this->headers     = new HeaderBag($this->server->getHeaders());

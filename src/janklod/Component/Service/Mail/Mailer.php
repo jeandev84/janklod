@@ -1,8 +1,8 @@
 <?php
-namespace Jan\Component\Service\Mailer;
+namespace Jan\Component\Service\Mail;
 
 
-use Jan\Component\Service\Mailer\Contract\MailTransportInterface;
+use Jan\Component\Service\Mail\Contract\MailTransportInterface;
 
 
 /**

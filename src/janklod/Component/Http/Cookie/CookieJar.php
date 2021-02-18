@@ -3,10 +3,11 @@ namespace Jan\Component\Http\Cookie;
 
 
 /**
- * Class Cookie
+ * Class CookieJar
+ *
  * @package Jan\Component\Http\Cookie
 */
-class Cookie
+class CookieJar
 {
 
       /**
@@ -36,7 +37,7 @@ class Cookie
        * @param $name
        * @param $value
        * @param int $expire
-       * @return Cookie
+       * @return CookieJar
       */
       public function set($name, $value, $expire = 3600)
       { 

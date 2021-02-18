@@ -1,8 +1,8 @@
 <?php
-namespace Jan\Component\Service\Mailer\Header;
+namespace Jan\Component\Service\Mail\Header;
 
 
-use Jan\Component\Service\Mailer\Contract\HeaderBuilderInterface;
+use Jan\Component\Service\Mail\Contract\HeaderBuilderInterface;
 
 /**
  * Class MimePart

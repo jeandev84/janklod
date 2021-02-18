@@ -1,5 +1,5 @@
 <?php
-namespace Jan\Component\Service\Mailer;
+namespace Jan\Component\Service\Mail;
 
 
 /**
