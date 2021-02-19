@@ -653,5 +653,5 @@ class Router implements RouterInterface
 
         return $parameters;
     }
-    
+
 }
