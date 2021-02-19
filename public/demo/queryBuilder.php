@@ -67,7 +67,7 @@ try {
 }
 
 
-dump(Manager::getInstance()->getConnection());
-dump(Manager::getInstance()->getConnection());
-dump(Manager::getInstance()->getConnection()->getQuery());
+//dump(Manager::getInstance()->getConnection());
+//dump(Manager::getInstance()->getConnection());
+//dump(Manager::getInstance()->getConnection()->getQuery());
 //dd(__FILE__, __LINE__);

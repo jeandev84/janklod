@@ -128,6 +128,7 @@ class Router implements RouterInterface
          foreach ($this->getRoutes() as $route)
          {
              /** @var Route $route */
+
              $routes[$route->getMethodsToString()][] = $route;
          }
 

@@ -12,7 +12,7 @@ class RouteCollection
       /**
        * @var array
       */
-      protected static $namedRoutes = [];
+      protected static $nameList = [];
 
 
 
@@ -26,13 +26,13 @@ class RouteCollection
 
       /**
        * @param Route $route
-       * @return RouteCollection
-      */
-      public function add(Route $route): RouteCollection
+       * @return Route
+       */
+      public function add(Route $route): Route
       {
            $this->routes[] = $route;
 
-           return $this;
+           return $route;
       }
 
 
@@ -41,9 +41,9 @@ class RouteCollection
        * @param $name
        * @param Route $route
       */
-      public static function setNamedRoute($name, Route $route)
+      public static function nameList($name, Route $route)
       {
-           static::$namedRoutes[$name] = $route;
+           static::$nameList[$name] = $route;
       }
 
 
@@ -61,9 +61,9 @@ class RouteCollection
       /**
        * @return array
       */
-      public static function getNamedRoutes(): array
+      public static function getNameList(): array
       {
-           return static::$namedRoutes;
+           return static::$nameList;
       }
 
 
@@ -74,7 +74,7 @@ class RouteCollection
       */
       public static function exists($name): bool
       {
-           return \array_key_exists($name, static::$namedRoutes);
+           return \array_key_exists($name, static::$nameList);
       }
 
 
@@ -85,7 +85,7 @@ class RouteCollection
       */
       public static function retrieve($name): Route
       {
-          return static::$namedRoutes[$name];
+          return static::$nameList[$name];
       }
 
 

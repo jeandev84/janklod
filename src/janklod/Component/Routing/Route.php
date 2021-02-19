@@ -215,7 +215,7 @@ class Route
               );
           }
 
-          RouteCollection::setNamedRoute($name, $this);
+          RouteCollection::nameList($name, $this);
 
           $this->name = $name;
 
