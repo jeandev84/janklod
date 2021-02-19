@@ -317,17 +317,24 @@ class Router implements RouterInterface
          ];
 
 
-         $resourceActions = ['index', 'show', 'restore', 'new', 'edit', 'delete'];
+         $resourceActions = [];
 
          foreach ($resources as $methods => $routes)
          {
              foreach ($routes as $routeItems)
              {
                  list($pathSuffix, $action, $name) = $routeItems;
-                 $this->map($methods, $path. '/'. $pathSuffix, $controller .'@'. $action, $prefixName.$name);
+                 $this->map($methods, $path = $path. '/'. $pathSuffix, $target = $controller .'@'. $action, $name = $prefixName.$name);
+                 $resourceActions['items'][] = RouteResource::getItems(
+                     $methods,
+                     $path,
+                     $target,
+                     $name
+                 );
              }
          }
 
+         $resourceActions['actions'] = RouteResource::getActions();
          $this->resources[$controller] = $resourceActions;
 
          return $this;
