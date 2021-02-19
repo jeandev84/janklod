@@ -27,7 +27,7 @@ class RouteCollection
       /**
        * @param Route $route
        * @return Route
-       */
+      */
       public function add(Route $route): Route
       {
            $this->routes[] = $route;
