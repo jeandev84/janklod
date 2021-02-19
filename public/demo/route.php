@@ -43,6 +43,8 @@ $router->group(function (Router $router) {
 
 }, $options);
 
+
+$router->resource('/cart', 'CartController');
 $router->get('/', 'HomeController@index', 'home');
 $router->get('/demo', 'DemoController@index', 'demo');
 
