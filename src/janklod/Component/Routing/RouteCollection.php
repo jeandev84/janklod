@@ -17,13 +17,6 @@ class RouteCollection
 
 
       /**
-       * @var array
-      */
-      protected $groups = [];
-
-
-
-      /**
        * @param Route $route
        * @return Route
       */

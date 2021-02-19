@@ -30,9 +30,15 @@ class Router implements RouterInterface
 
 
     /**
+     * @var bool
+    */
+    protected $isRouteGroup = false;
+
+
+    /**
      * @var array
     */
-    protected $routes;
+    protected $routes = [];
 
 
 
@@ -57,6 +63,15 @@ class Router implements RouterInterface
      * @var array
     */
     protected $resources = [];
+
+
+
+    /**
+     * @var array
+    */
+    protected $groups = [];
+
+
 
 
     /**
@@ -100,6 +115,13 @@ class Router implements RouterInterface
     {
          $this->routes[] = $route;
 
+         if($this->isRouteGroup === true) {
+
+             if($prefix = $this->getOption(static::OPTION_PARAM_PATH_PREFIX)) {
+                 $this->groups[$prefix][] = $route;
+             }
+         }
+
          return $route;
     }
 
@@ -116,10 +138,21 @@ class Router implements RouterInterface
     }
 
 
+
     /**
      * @return array
     */
     public function getGroupRoutes(): array
+    {
+        return $this->groups;
+    }
+
+
+
+    /**
+     * @return array
+    */
+    public function getRoutesByMethods(): array
     {
          $routes = [];
 
@@ -273,13 +306,12 @@ class Router implements RouterInterface
     */
     public function group(Closure $routeCallback, array $options = [])
     {
-         if($options)
-         {
+         if($options) {
              $this->setOptions($options);
          }
 
          $routeCallback($this);
-
+         $this->isRouteGroup = true;
          $this->flushOptions();
     }
 

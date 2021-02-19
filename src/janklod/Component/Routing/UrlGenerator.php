@@ -29,7 +29,7 @@ class UrlGenerator implements UrlGeneratorInterface
       */
       public function __construct(RouterInterface $router)
       {
-          $this->router = $router;
+            $this->router = $router;
       }
 
 
