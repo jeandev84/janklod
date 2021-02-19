@@ -30,7 +30,7 @@ class Router implements RouterInterface
 
 
     /**
-     * @var array
+     * @var RouteCollection
     */
     protected $routes;
 
@@ -61,13 +61,16 @@ class Router implements RouterInterface
 
     /**
      * Router constructor.
-     * @param string $baseUrl
-    */
-    public function __construct(string $baseUrl = '')
+     *
+     * @param RouteCollection|null $routeCollection
+     */
+    public function __construct(RouteCollection $routeCollection = null)
     {
-         if($baseUrl) {
-             $this->setBaseURL($baseUrl);
+         if(! $routeCollection) {
+             $routeCollection = new RouteCollection();
          }
+
+         $this->routeCollection = $routeCollection;
     }
 
 
@@ -91,16 +94,15 @@ class Router implements RouterInterface
     }
 
 
-
     /**
      * @param Route $route
-     * @return Route
+     * @return Router
     */
-    public function add(Route $route): Route
+    public function add(Route $route): Router
     {
-         $this->routes[] = $route;
+         $this->routeCollection->add($route);
 
-         return $route;
+         return $this;
     }
 
 
@@ -112,7 +114,7 @@ class Router implements RouterInterface
     */
     public function getRoutes(): array
     {
-        return $this->routes;
+        return $this->routeCollection->getRoutes();
     }
 
 
@@ -196,7 +198,11 @@ class Router implements RouterInterface
 
 
         /* add route */
-        return $this->add($route);
+        $this->add($route);
+
+
+        /* return current route */
+        return $route;
     }
 
 
@@ -209,8 +215,10 @@ class Router implements RouterInterface
     public function match(string $requestMethod, string $requestUri)
     {
         foreach ($this->getRoutes() as $route) {
-            if($route->match($requestMethod, $requestUri)) {
-                return $route;
+            if($route instanceof Route) {
+                if($route->match($requestMethod, $requestUri)) {
+                    return $route;
+                }
             }
         }
 
@@ -620,5 +628,5 @@ class Router implements RouterInterface
 
         return $parameters;
     }
-    
+
 }

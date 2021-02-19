@@ -1,0 +1,105 @@
+<?php
+namespace Jan\Component\Routing;
+
+
+use Closure;
+
+
+/**
+ * Class RouteGroup
+ * @package Jan\Component\Routing
+*/
+class RouteGroup
+{
+
+     /**
+      * @var array
+     */
+     protected $options = [];
+
+
+
+     /**
+      * RouteGroup constructor.
+     */
+     public function __construct()
+     {
+
+     }
+
+
+     /**
+      * @param array $options
+     */
+     public function setOptions(array $options)
+     {
+          $this->options = $options;
+     }
+
+
+     /**
+      * @param Closure $routeCallback
+      * @return false
+     */
+     public function call(Closure $routeCallback): bool
+     {
+          if(! empty($this->options))
+          {
+              $routeCallback();
+              $this->options = [];
+              return true;
+          }
+
+          return false;
+     }
+
+
+
+     /**
+      * @return array
+     */
+     public function getOptions(): array
+     {
+         return $this->options;
+     }
+
+
+     /**
+      * @return array
+     */
+     public function getOptionKeys(): array
+     {
+         return \array_keys($this->options);
+     }
+
+//
+//     /**
+//      * @param $key
+//      * @param null $default
+//      * @return mixed|null
+//      * @throws \Exception
+//     */
+//     public function getOption($key, $default = null)
+//     {
+//         foreach (array_keys($this->options) as $index)
+//         {
+//             if(! $this->isValidOption($index))
+//             {
+//                 throw new \Exception(sprintf('%s is not available this param', $index));
+//             }
+//         }
+//
+//         return $this->options[$key] ?? $default;
+//     }
+//
+//
+//
+//     /**
+//      * @param $index
+//      * @return bool
+//     */
+//     protected function isValidOption($index): bool
+//     {
+//          return \in_array($index, $this->availableOptions);
+//     }
+}

@@ -4,6 +4,7 @@ namespace Jan\Component\Routing;
 
 use Closure;
 
+
 /**
  * Class RouteGroup
  * @package Jan\Component\Routing
@@ -11,32 +12,11 @@ use Closure;
 class RouteGroup
 {
 
-     const KEY_OPTION_PARAM_PATH_PREFIX  = 'path.prefix';
-     const KEY_OPTION_PARAM_NAMESPACE    = 'namespace';
-     const KEY_OPTION_PARAM_NAME_PREFIX  = 'name.prefix';
-
-
-     const OPTION_PARAM_PATH_PREFIX      = 'prefix';
-     const OPTION_PARAM_NAMESPACE        = 'namespace';
-     const OPTION_PARAM_MIDDLEWARE       = 'middleware';
-     const OPTION_PARAM_NAME_PREFIX      = 'name';
-
-
-
      /**
       * @var array
      */
      protected $options = [];
 
-
-
-     /**
-      * RouteGroup constructor.
-     */
-     public function __construct()
-     {
-
-     }
 
 
      /**
@@ -65,13 +45,12 @@ class RouteGroup
      }
 
 
+
      /**
-      * @param $key
-      * @param null $default
-      * @return mixed|null
+      * @return array
      */
-     public function getOption($key, $default = null)
+     public function getOptions(): array
      {
-         return $this->options[$key] ?? $default;
+         return $this->options;
      }
 }

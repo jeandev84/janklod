@@ -1,0 +1,12 @@
+<?php
+namespace Jan\Component\Routing;
+
+
+/**
+ * Class RouteParamResolver
+ * @package Jan\Component\Routing
+*/
+class RouteParamResolver
+{
+
+}

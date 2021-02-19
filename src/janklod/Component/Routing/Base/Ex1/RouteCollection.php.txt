@@ -1,0 +1,242 @@
+<?php
+namespace Jan\Component\Routing;
+
+
+/**
+ * Class RouteCollection
+ * @package Jan\Component\Routing
+*/
+class RouteCollection
+{
+
+      const KEY_OPTION_PARAM_PATH_PREFIX  = 'path.prefix';
+      const KEY_OPTION_PARAM_NAMESPACE    = 'namespace';
+      const KEY_OPTION_PARAM_NAME_PREFIX  = 'name.prefix';
+
+
+      const OPTION_PARAM_PATH_PREFIX      = 'prefix';
+      const OPTION_PARAM_NAMESPACE        = 'namespace';
+      const OPTION_PARAM_MIDDLEWARE       = 'middleware';
+      const OPTION_PARAM_NAME_PREFIX      = 'name';
+
+
+
+      /**
+       * @var array
+      */
+      protected $routes = [];
+
+
+
+      /**
+       * @var array
+      */
+      protected $groups = [];
+
+
+
+      /**
+       * @var RouteGroup|null
+      */
+      protected $routeGroup;
+
+
+
+      /**
+       * RouteCollection constructor.
+       * @param RouteGroup|null $routeGroup
+      */
+      public function __construct(RouteGroup $routeGroup = null)
+      {
+           if(! $routeGroup) {
+               $routeGroup = new RouteGroup();
+           }
+
+           $this->routeGroup = $routeGroup;
+      }
+
+
+
+      /**
+       * @param Route $route
+       * @return Route
+      */
+      public function add(Route $route): Route
+      {
+           $this->routes[] = $route;
+
+           return $route;
+      }
+
+
+
+
+     /**
+      * @return array
+     */
+     public function getRoutes(): array
+     {
+         return $this->routes;
+     }
+
+
+
+    /**
+     * @return array
+     */
+    public function getNamedRoutes(): array
+    {
+        return Route::getNameList();
+    }
+
+
+
+     /**
+      * resolve methods
+      *
+      * @param $methods
+      * @return array
+     */
+     protected function resolveMethods($methods): array
+     {
+         if(is_string($methods))
+         {
+             $methods = explode('|', $methods);
+         }
+
+         return (array) $methods;
+     }
+
+
+    /**
+     * Resolve route path
+     *
+     * @param string $path
+     * @return string
+     * @throws \Exception
+    */
+    protected function resolvePath(string $path): string
+    {
+        if($prefix = $this->getOption(static::OPTION_PARAM_PATH_PREFIX))
+        {
+            $path = rtrim($prefix, '/') . '/'. ltrim($path, '/');
+        }
+
+        return $path;
+    }
+
+
+
+    /**
+     * Resolve handle
+     *
+     * @param $target
+     * @return string
+     * @throws \Exception
+    */
+    protected function resolveTarget($target): string
+    {
+        if(\is_string($target) && $namespace = $this->getOption(static::OPTION_PARAM_NAMESPACE))
+        {
+            $target = rtrim($namespace, '\\') .'\\' . $target;
+        }
+
+        return $target;
+    }
+
+
+    /**
+     * @param $name
+     * @return string
+     * @throws \Exception
+    */
+    protected function resolveName($name): string
+    {
+        if($prefixed = $this->getOption(static::OPTION_PARAM_NAME_PREFIX))
+        {
+            return $prefixed . $name;
+        }
+
+        return $name;
+     }
+
+
+
+     /**
+      * @param $key
+      * @param null $default
+      * @return mixed|null
+      * @throws \Exception
+     */
+     protected function getOption($key, $default = null)
+     {
+         foreach ($this->routeGroup->getOptionKeys() as $index)
+         {
+             if(! $this->isValidOption($index))
+             {
+                throw new \Exception(sprintf('%s is not available this param', $index));
+             }
+         }
+
+        return $this->options[$key] ?? $default;
+     }
+
+
+
+    /**
+     * @param $index
+     * @return bool
+    */
+    protected function isValidOption($index): bool
+    {
+        return \in_array($index, $this->getAvailableOptions());
+    }
+
+
+
+    /**
+     * @return string[]
+    */
+    protected function getAvailableOptions(): array
+    {
+        return [
+            self::OPTION_PARAM_PATH_PREFIX,
+            self::OPTION_PARAM_NAMESPACE,
+            self::OPTION_PARAM_MIDDLEWARE,
+            self::OPTION_PARAM_NAME_PREFIX
+        ];
+    }
+
+
+    /**
+     * @return string[]
+     * @throws \Exception
+    */
+    protected function routeOptionParameters(): array
+    {
+        return $this->resolvedRouteOptionParameters([
+            self::KEY_OPTION_PARAM_PATH_PREFIX => $this->getOption(self::OPTION_PARAM_PATH_PREFIX),
+            self::KEY_OPTION_PARAM_NAME_PREFIX => $this->getOption(self::OPTION_PARAM_NAME_PREFIX),
+            self::KEY_OPTION_PARAM_NAMESPACE   => $this->getOption(self::OPTION_PARAM_NAMESPACE)
+        ]);
+    }
+
+
+
+    /**
+     * @param array $routeOptions
+     * @return array
+    */
+    protected function resolvedRouteOptionParameters(array $routeOptions): array
+    {
+        $parameters = [];
+
+        foreach ($routeOptions as $key => $value)
+        {
+            $parameters[$key] = (string) $value;
+        }
+
+        return $parameters;
+    }
+
+}
