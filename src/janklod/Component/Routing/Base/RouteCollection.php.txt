@@ -16,14 +16,6 @@ class RouteCollection
 
 
 
-
-      /**
-       * @var array
-      */
-      protected $groups = [];
-
-
-
       /**
        * @param Route $route
        * @return Route
@@ -35,16 +27,6 @@ class RouteCollection
            return $route;
       }
 
-
-
-      /**
-       * @param $index
-       * @param Route $route
-      */
-      public function addGroup($index, Route $route)
-      {
-           $this->groups[$index][] = $route;
-      }
 
 
 
@@ -63,6 +45,6 @@ class RouteCollection
      */
     public function getNamedRoutes(): array
     {
-        return Route::nameList();
+        return Route::getNameList();
     }
 }

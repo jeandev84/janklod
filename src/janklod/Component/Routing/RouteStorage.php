@@ -6,7 +6,7 @@ namespace Jan\Component\Routing;
  * Class RouteResource
  * @package Jan\Component\Routing
 */
-class RouteResource
+class RouteStorage
 {
 
 
@@ -20,7 +20,7 @@ class RouteResource
      /**
       * @return string[]
      */
-     public static function getActions(): array
+     public static function getResourceActions(): array
      {
          return ['index', 'show',  'new', 'edit', 'delete', 'restore'];
      }
@@ -29,22 +29,32 @@ class RouteResource
      /**
       * @return array
      */
-     public static function getItems(): array
+     public static function getResourceItems(): array
      {
          return [
              'GET' => [
                  ['', 'index', 'list'],
-                 ['{id}', 'show', 'show'],
-                 ['{id}/restore', 'restore', 'restore'],
+                 ['/{id}', 'show', 'show'],
+                 ['/{id}/restore', 'restore', 'restore'],
              ],
              'GET|POST' => [
-                 ['new', 'edit', 'new'],
-                 ['{id}/edit', 'edit', 'edit'],
+                 ['/new', 'new', 'new'],
+                 ['/{id}/edit', 'edit', 'edit'],
              ],
              'DELETE' => [
-                 ['{id}/delete', 'delete', 'delete'],
+                 ['/{id}/delete', 'delete', 'delete'],
              ]
          ];
+     }
+
+
+
+     /**
+      * @return string[]
+     */
+     public static function getResourceSingleActions(): array
+     {
+          return ['show', 'new', 'edit', 'restore', 'delete'];
      }
 
 

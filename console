@@ -9,6 +9,7 @@
 |   Ex: $ php console make:controller HomeController
 |   Ex: $ php console make:model User
 |   Ex: $ php console make:addition -a=1 -b=2
+|   Ex: $ php console make:resource -entity=Product
 |   Ex: $ php console serve (run internal server php)
 |------------------------------------------------------------------
 */

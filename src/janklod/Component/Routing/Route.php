@@ -88,14 +88,21 @@ class Route
 
 
       /**
+       * @var bool
+      */
+      protected $isGroup = false;
+
+
+
+
+      /**
        * @var array
       */
       protected static $nameList = [];
 
 
 
-
-      /**
+     /**
        * Route constructor.
        *
        * @param array $methods
@@ -110,6 +117,28 @@ class Route
             $this->setTarget($target);
             $this->setPrefixName($prefixName);
       }
+
+
+
+      /**
+       * @param bool $isGroup
+      */
+      public function setIsGroup(bool $isGroup)
+      {
+           $this->isGroup = $isGroup;
+      }
+
+
+
+      /**
+       * @return bool
+      */
+      public function isGroup(): bool
+      {
+          return $this->isGroup;
+      }
+
+
 
 
       /**
@@ -202,6 +231,7 @@ class Route
       }
 
 
+
       /**
         * set route name
         *
@@ -231,7 +261,7 @@ class Route
       /**
        * @return array
       */
-      public static function getNameList(): array
+      public static function nameList(): array
       {
            return static::$nameList;
       }
