@@ -216,9 +216,11 @@ class Router implements RouterInterface
     {
         foreach ($this->getRoutes() as $route)
         {
-            if($route->match($requestMethod, $requestUri))
-            {
-                return $route;
+            if($route instanceof Route) {
+                if($route->match($requestMethod, $requestUri))
+                {
+                    return $route;
+                }
             }
         }
 
@@ -300,23 +302,7 @@ class Router implements RouterInterface
     public function resource(string $path, string $controller): Router
     {
          $prefixName = trim($path, '/') . '.';
-
-         $resources = [
-             'GET' => [
-                ['', 'index', 'list'],
-                ['{id}', 'show', 'show'],
-                ['{id}/restore', 'restore', 'restore'],
-             ],
-             'GET|POST' => [
-                ['new', 'edit', 'new'],
-                ['{id}/edit', 'edit', 'edit'],
-             ],
-             'DELETE' => [
-                ['{id}/delete', 'delete', 'delete'],
-             ]
-         ];
-
-
+         $resources = RouteResource::getItems();
          $resourceActions = [];
 
          foreach ($resources as $methods => $routes)
@@ -325,12 +311,7 @@ class Router implements RouterInterface
              {
                  list($pathSuffix, $action, $name) = $routeItems;
                  $this->map($methods, $path = $path. '/'. $pathSuffix, $target = $controller .'@'. $action, $name = $prefixName.$name);
-                 $resourceActions['items'][] = RouteResource::getItems(
-                     $methods,
-                     $path,
-                     $target,
-                     $name
-                 );
+                 $resourceActions['items'][] = compact('methods', 'path', 'target', 'name');
              }
          }
 

@@ -9,6 +9,14 @@ namespace Jan\Component\Routing;
 class RouteResource
 {
 
+
+     /**
+      * @var array
+     */
+     protected $resources = [];
+
+
+
      /**
       * @return string[]
      */
@@ -19,14 +27,53 @@ class RouteResource
 
 
      /**
-      * @param $methods
-      * @param $path
-      * @param $target
-      * @param $name
       * @return array
      */
-     public static function getItems($methods, $path, $target, $name): array
+     public static function getItems(): array
      {
-         return compact('methods', 'path', 'target', 'name');
+         return [
+             'GET' => [
+                 ['', 'index', 'list'],
+                 ['{id}', 'show', 'show'],
+                 ['{id}/restore', 'restore', 'restore'],
+             ],
+             'GET|POST' => [
+                 ['new', 'edit', 'new'],
+                 ['{id}/edit', 'edit', 'edit'],
+             ],
+             'DELETE' => [
+                 ['{id}/delete', 'delete', 'delete'],
+             ]
+         ];
+     }
+
+
+     /**
+      * @param string $controller
+      * @param array $resourceItems
+     */
+     public function add(string $controller, array $resourceItems)
+     {
+          $this->resources[$controller] = $resourceItems;
+     }
+
+
+     /**
+      * @param string $controller
+      * @return bool
+     */
+     public function has(string $controller): bool
+     {
+         return isset($this->resources[$controller]);
+     }
+
+
+     /**
+      * @param string $controller
+      * @return array|mixed
+     */
+     public function get(string $controller): array
+     {
+         return $this->resources[$controller] ?? [];
      }
 }
