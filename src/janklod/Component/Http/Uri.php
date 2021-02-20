@@ -1,7 +1,7 @@
 <?php
 namespace Jan\Component\Http;
 
-use Jan\Component\Http\Encoder\UrlEncoder;
+use Jan\Component\Http\Helper\UrlEncoder;
 
 
 /**

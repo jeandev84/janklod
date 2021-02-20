@@ -2,17 +2,22 @@
 namespace Jan\Component\Http\Bag;
 
 
+use Jan\Component\Http\Bag\Contract\ParameterBagInterface;
+
+
+
 /**
  * Class ParameterBag
  * @package Jan\Component\Http\Bag
 */
-class ParameterBag
+class ParameterBag implements ParameterBagInterface
 {
 
     /**
      * @var array
     */
     protected $data = [];
+
 
 
     /**
