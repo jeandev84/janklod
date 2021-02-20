@@ -2,11 +2,11 @@
 namespace Jan\Component\Http;
 
 
+use Jan\Component\Http\Bag\CookieBag;
 use Jan\Component\Http\Bag\FileBag;
 use Jan\Component\Http\Bag\HeaderBag;
 use Jan\Component\Http\Bag\ParameterBag;
 use Jan\Component\Http\Bag\ServerBag;
-use Jan\Component\Http\Cookie\CookieJar;
 use Jan\Component\Http\Session\Session;
 
 
@@ -26,12 +26,14 @@ class Request
     public $queryParams;
 
 
+
     /**
      * Get params from request post $_POST
      *
      * @var ParameterBag
     */
     public $request;
+
 
 
     /**
@@ -46,7 +48,7 @@ class Request
 
     /**
      * Get parameters from cookies $_COOKIES
-     * @var CookieJar
+     * @var CookieBag
     */
     public $cookies;
 
@@ -238,6 +240,7 @@ class Request
     }
 
 
+
     /**
      * @param array $queryParams
      * @param array $request
@@ -260,7 +263,7 @@ class Request
         $this->queryParams = new ParameterBag($queryParams);
         $this->request     = new ParameterBag($request);
         $this->attributes  = new ParameterBag($attributes);
-        $this->cookies     = new CookieJar($cookies);
+        $this->cookies     = new CookieBag($cookies);
         $this->files       = new FileBag($files);
         $this->server      = new ServerBag($server);
         $this->headers     = new HeaderBag($this->server->getHeaders());
@@ -285,6 +288,8 @@ class Request
         $this->method = $this->getMethod();
         */
     }
+
+
 
 
     /**
@@ -360,10 +365,8 @@ class Request
 
         /* dump($requestMethod); */
         
-        if($_POST)
-        {
+        if($_POST) {
            $request->request = new ParameterBag($_POST);
-
         }
         
         if(\in_array($requestMethod, ['PUT', 'DELETE', 'PATCH'])) {
@@ -371,7 +374,6 @@ class Request
             parse_str($request->getContent(), $data);
             $request->request = new ParameterBag($data);
         }
-
 
         return $request;
     }
@@ -604,9 +606,7 @@ class Request
     */
     public function setMethod(string $method): Request
     {
-        /* $this->server->set('REQUEST_METHOD', $method); */
-
-        $this->method = $method;
+        $this->server->set('REQUEST_METHOD', $method);
 
         return $this;
     }
@@ -619,12 +619,7 @@ class Request
     */
     public function getMethod(): string
     {
-        if(! $this->method)
-        {
-            $this->method = $this->server->get('REQUEST_METHOD', 'GET');
-        }
-          
-        return $this->method;
+        return $this->server->get('REQUEST_METHOD', 'GET');
     }
 
 

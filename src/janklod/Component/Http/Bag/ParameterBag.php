@@ -21,7 +21,7 @@ class ParameterBag
     */
     public function __construct(array $data)
     {
-        $this->data = $data;
+          $this->data = $data;
     }
     
 

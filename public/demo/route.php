@@ -18,6 +18,7 @@
 //dd($routeCollection->getRoutes());
 
 
+use Jan\Component\Routing\Route;
 use Jan\Component\Routing\Router;
 
 $router = new Router();
@@ -39,7 +40,6 @@ $router->group(function (Router $router) {
   $router->map('GET|POST', '/post/new', 'PostController@new', 'new');
   $router->map('GET|POST', '/post/{id}/edit', 'PostController@edit', 'edit');
   $router->get('/post/{id}/delete', 'PostController@delete', 'delete');
-
   $router->resource('/products', 'ProductController');
 
   /* $router->resource('/orders', 'Operation\OrderController'); */
@@ -54,6 +54,8 @@ $router->get('/foo', 'FooController@index', 'foo');
 
 dump($router->getRoutesByMethod(), $router->getGroups(), $router->getResources());
 
+
+/** @var Route $route */
 if($route = $router->match($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'])) {
     echo "Matched route";
     dd($route);

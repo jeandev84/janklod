@@ -517,7 +517,7 @@ class Router  extends RouteCollection implements RouterInterface
             if(! $this->isValidOption($indexOption))
             {
                  $this->abortIf(
-                     sprintf('%s is not available this param', $indexOption)
+                     sprintf('(%s) is not available this param', $indexOption)
                  );
             }
         }
