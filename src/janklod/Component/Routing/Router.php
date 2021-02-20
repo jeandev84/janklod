@@ -114,12 +114,11 @@ class Router  extends RouteCollection implements RouterInterface
     public function map($methods, string $path, $target, string $name = null): Route
     {
         /* resolve given params */
-        list($methods, $path, $target) = array_values(
-            $this->resolvedRouteParams($methods, $path, $target)
-        );
-
-        $middleware = $this->getOption(static::OPTION_PARAM_MIDDLEWARE, []);
-        $prefixName = $this->getOption(static::OPTION_PARAM_NAME_PREFIX, '');
+        $methods    = $this->resolveMethods($methods);
+        $path       = $this->resolvePath($path);
+        $target     = $this->resolveTarget($target);
+        $middleware = $this->getMiddlewares();
+        $prefixName = $this->getPrefixName();
 
 
         $route = new Route($methods, $path, $target);
@@ -134,8 +133,7 @@ class Router  extends RouteCollection implements RouterInterface
 
         return $this->add($route);
     }
-
-
+    
 
     /**
      * @param string $requestMethod
@@ -416,26 +414,6 @@ class Router  extends RouteCollection implements RouterInterface
     }
 
 
-
-    /**
-     * @param $methods
-     * @param $path
-     * @param $target
-     * @param $name
-     * @return array
-    */
-    protected function resolvedRouteParams($methods, $path, $target, $name = ''): array
-    {
-        return [
-            'methods' => $this->resolveMethods($methods),
-            'path'    => $this->resolvePath($path),
-            'target'  => $this->resolveTarget($target),
-            'name'    => $this->resolveName($name)
-        ];
-    }
-
-
-
     /**
      * resolve methods
      *
@@ -444,8 +422,7 @@ class Router  extends RouteCollection implements RouterInterface
     */
     protected function resolveMethods($methods): array
     {
-        if(is_string($methods))
-        {
+        if(is_string($methods)) {
             $methods = explode('|', $methods);
         }
 
@@ -462,8 +439,7 @@ class Router  extends RouteCollection implements RouterInterface
     */
     protected function resolvePath(string $path): string
     {
-        if($prefix = $this->getOption(static::OPTION_PARAM_PATH_PREFIX))
-        {
+        if($prefix = $this->getPrefixPath()) {
             $path = rtrim($prefix, '/') . '/'. ltrim($path, '/');
         }
 
@@ -479,8 +455,7 @@ class Router  extends RouteCollection implements RouterInterface
     */
     protected function resolveTarget($target): string
     {
-        if(\is_string($target) && $namespace = $this->getOption(static::OPTION_PARAM_NAMESPACE))
-        {
+        if(\is_string($target) && $namespace = $this->getNamespace()) {
             $target = rtrim($namespace, '\\') .'\\' . $target;
         }
 
@@ -494,13 +469,52 @@ class Router  extends RouteCollection implements RouterInterface
     */
     protected function resolveName($name): string
     {
-        if($prefixed = $this->getOption(static::OPTION_PARAM_NAME_PREFIX))
-        {
+        if($prefixed = $this->getPrefixName()) {
             return $prefixed . $name;
         }
 
         return $name;
     }
+
+
+
+    /**
+     * @return mixed|void|null
+    */
+    protected function getPrefixPath()
+    {
+        return $this->getOption(static::OPTION_PARAM_PATH_PREFIX);
+    }
+
+
+
+    /**
+     * @return mixed|void|null
+    */
+    protected function getNamespace()
+    {
+        return $this->getOption(static::OPTION_PARAM_NAMESPACE);
+    }
+
+
+    /**
+     * @return mixed|void|null
+     */
+    protected function getMiddlewares()
+    {
+        return $this->getOption(static::OPTION_PARAM_MIDDLEWARE, []);
+    }
+
+
+
+    /**
+     * @return mixed|void|null
+    */
+    protected function getPrefixName()
+    {
+        return $this->getOption(static::OPTION_PARAM_NAME_PREFIX, '');
+    }
+
 
 
     /**
@@ -514,8 +528,7 @@ class Router  extends RouteCollection implements RouterInterface
     {
         foreach (array_keys($this->options) as $indexOption)
         {
-            if(! $this->isValidOption($indexOption))
-            {
+            if(! $this->isValidOption($indexOption)) {
                  $this->abortIf(
                      sprintf('(%s) is not available this param', $indexOption)
                  );
@@ -537,8 +550,9 @@ class Router  extends RouteCollection implements RouterInterface
 
     /**
      * @param string $message
+     * @param int $code
     */
-    protected function abortIf($message = 'not valid!')
+    protected function abortIf($message = 'not valid!', $code = 404)
     {
         return (function() use ($message) {
             throw new \RuntimeException($message);
@@ -552,7 +566,7 @@ class Router  extends RouteCollection implements RouterInterface
     */
     protected function isValidOption($indexOption): bool
     {
-        return \in_array($indexOption, $this->getAllowedOptionParams());
+        return \in_array($indexOption, $this->getAvailableOptionParams());
     }
 
 
@@ -574,7 +588,7 @@ class Router  extends RouteCollection implements RouterInterface
     /**
      * @return string[]
     */
-    protected function getAllowedOptionParams(): array
+    protected function getAvailableOptionParams(): array
     {
         return [
             self::OPTION_PARAM_PATH_PREFIX,
@@ -585,35 +599,32 @@ class Router  extends RouteCollection implements RouterInterface
     }
 
 
+    /**
+     * @return array
+    */
+    protected function getRouteOptions(): array
+    {
+        return [
+            self::KEY_OPTION_PARAM_PATH_PREFIX => $this->getOption(self::OPTION_PARAM_PATH_PREFIX),
+            self::KEY_OPTION_PARAM_NAME_PREFIX => $this->getOption(self::OPTION_PARAM_NAME_PREFIX),
+            self::KEY_OPTION_PARAM_NAMESPACE   => $this->getOption(self::OPTION_PARAM_NAMESPACE)
+        ];
+    }
+    
+    
 
     /**
      * @return string[]
     */
     protected function routeOptionParameters(): array
     {
-        return $this->resolvedRouteOptionParameters([
-            self::KEY_OPTION_PARAM_PATH_PREFIX => $this->getOption(self::OPTION_PARAM_PATH_PREFIX),
-            self::KEY_OPTION_PARAM_NAME_PREFIX => $this->getOption(self::OPTION_PARAM_NAME_PREFIX),
-            self::KEY_OPTION_PARAM_NAMESPACE   => $this->getOption(self::OPTION_PARAM_NAMESPACE)
-        ]);
-    }
-
-
-
-    /**
-     * @param array $routeOptions
-     * @return array
-    */
-    protected function resolvedRouteOptionParameters(array $routeOptions): array
-    {
         $parameters = [];
 
-        foreach ($routeOptions as $key => $value)
+        foreach ($this->getRouteOptions() as $key => $value)
         {
             $parameters[$key] = (string) $value;
         }
 
         return $parameters;
     }
-    
 }
