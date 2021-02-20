@@ -41,11 +41,15 @@ $router->group(function (Router $router) {
 
   $router->resource('/products', 'ProductController');
 
+  /* $router->resource('/orders', 'Operation\OrderController'); */
+
 }, $options);
 
 
 $router->resource('/cart', 'CartController');
-$router->get('/', 'HomeController@index', 'home');
-$router->get('/demo', 'DemoController@index', 'demo');
+$router->get('/', 'HomeController@index', 'welcome');
+$router->get('/foo', 'FooController@index', 'foo');
 
-dd($router->getRoutes(), $router->getGroupRoutes(), $router->getResources());
+dd($router->getResources());
+
+/* dd($router->getRoutes(), $router->getGroups(), $router->getResources()); */

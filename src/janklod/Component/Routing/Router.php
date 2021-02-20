@@ -9,14 +9,16 @@ use Jan\Component\Routing\Exception\RouterException;
 use Jan\Component\Routing\Traits\UrlGeneratorTrait;
 
 
+
 /**
  * Class Router
  * @package Jan\Component\Routing
 */
-class Router implements RouterInterface
+class Router  extends RouteCollection implements RouterInterface
 {
 
     use UrlGeneratorTrait;
+
 
     const KEY_OPTION_PARAM_PATH_PREFIX  = 'path.prefix';
     const KEY_OPTION_PARAM_NAMESPACE    = 'namespace';
@@ -33,21 +35,6 @@ class Router implements RouterInterface
      * @var bool
     */
     protected $isRouteGroup = false;
-
-
-
-    /**
-     * @var RouteCollection|null
-    */
-    protected $routeCollection;
-
-
-
-
-    /**
-     * @var array
-    */
-    protected $routes = [];
 
 
 
@@ -70,32 +57,14 @@ class Router implements RouterInterface
 
 
     /**
-     * @var array
-    */
-    protected $resources = [];
-
-
-
-
-    /**
-     * @var array
-    */
-    protected $groups = [];
-
-
-
-
-    /**
      * Router constructor.
-     * @param RouteCollection|null $routeCollection
+     * @param
     */
-    public function __construct(RouteCollection  $routeCollection = null)
+    public function __construct(string $baseUrl = '')
     {
-         if(! $routeCollection) {
-             $routeCollection = new RouteCollection();
+         if ($baseUrl) {
+             $this->setBaseURL($baseUrl);
          }
-
-         $this->routeCollection = $routeCollection;
     }
 
 
@@ -112,10 +81,8 @@ class Router implements RouterInterface
         /** @var Route $route */
         foreach ($routes as $route)
         {
-            $this->add($route);
+             parent::add($route);
         }
-
-        return $this;
     }
 
 
@@ -128,98 +95,13 @@ class Router implements RouterInterface
     {
          if($this->isRouteGroup === true) {
              if($prefix = $this->getOption(static::OPTION_PARAM_PATH_PREFIX)) {
-                 $this->groups[$prefix][] = $route;
+                 $this->addGroup($prefix, $route);
              }
          }
 
-         $this->routes[] = $route;
-
-         return $route;
+         return parent::add($route);
     }
 
-
-
-    /**
-     * @return array
-    */
-    public function getNamedRoutes(): array
-    {
-        return Route::nameList();
-    }
-
-
-
-    /**
-     * get route collection
-     *
-     * @return array
-    */
-    public function getRoutes(): array
-    {
-        return $this->routes;
-    }
-
-
-
-    /**
-     * @return array
-    */
-    public function getGroupRoutes(): array
-    {
-        return $this->groups;
-    }
-
-
-
-    /**
-     * @return array
-    */
-    public function getRoutesByMethods(): array
-    {
-         $routes = [];
-
-         foreach ($this->getRoutes() as $route)
-         {
-             /** @var Route $route */
-
-             $routes[$route->getMethodsToString()][] = $route;
-         }
-
-         return $routes;
-    }
-
-
-
-    /**
-     * @return array
-    */
-    public function getResources(): array
-    {
-        return $this->resources;
-    }
-
-
-
-    /**
-     * @param string $controller
-     * @return array|mixed
-     * @throws Exception
-    */
-    public function getResource(string $controller): array
-    {
-        return $this->resources[$controller] ?? [];
-    }
-
-
-
-    /**
-     * @param $path
-     * @return array|mixed
-    */
-    public function getGroup($path): array
-    {
-        return $this->groups[$path] ?? [];
-    }
 
 
     /**
@@ -240,29 +122,16 @@ class Router implements RouterInterface
         $prefixName = $this->getOption(static::OPTION_PARAM_NAME_PREFIX, '');
 
 
-        /* create new instance of route */
-        $route = new Route($methods, $path, $target, $prefixName);
-
-
-        /* set middleware */
+        $route = new Route($methods, $path, $target);
+        $route->where($this->patterns);
+        $route->setPrefixName($prefixName);
         $route->middleware($middleware);
-
-
-        /* set options */
         $route->addOptions($this->routeOptionParameters());
 
-
-        /* set name */
         if($name) {
             $route->name($name);
         }
 
-
-        /* set globals patterns */
-        $route->where($this->patterns);
-
-
-        /* add route */
         return $this->add($route);
     }
 
@@ -276,8 +145,12 @@ class Router implements RouterInterface
     public function match(string $requestMethod, string $requestUri)
     {
         foreach ($this->getRoutes() as $route) {
-            if($route->match($requestMethod, $requestUri)) {
-                return $route;
+
+            /** @var Route $route */
+            if($route instanceof Route) {
+                if($route->match($requestMethod, $requestUri)) {
+                    return $route;
+                }
             }
         }
 
@@ -308,6 +181,8 @@ class Router implements RouterInterface
     {
         return $this->map(['POST'], $path, $target, $name);
     }
+
+
 
 
     /**
@@ -372,14 +247,29 @@ class Router implements RouterInterface
 
     /**
      * @param string $pathPrefix
-     * @param string $controller
+     * @param string $controllerClass
      * @return Router
     */
-    public function resource(string $pathPrefix, string $controller): Router
+    public function resource(string $pathPrefix, string $controllerClass): Router
     {
-         $this->resources[$controller] = $this->getResourceItems($pathPrefix, $controller);
+        $resourceItems = [];
+        $resourceComponents = RouteStorage::makeResourceComponents($pathPrefix, $controllerClass);
 
-         return $this;
+        $templateDir = $this->resolvePath($pathPrefix);
+
+        foreach ($resourceComponents as $components) {
+
+            list($methods, $path, $action, $name) = $components;
+            $this->map($methods, $path , $controllerClass .'@'.  $action, $name);
+            $resourceItems['resources'][$action]  = $templateDir . '/'. $action. '.php';
+        }
+
+        $resourceItems['partials'][] = $templateDir . '/_form.php';
+        $resourceItems['resource'] = $templateDir;
+
+        $this->addResource($this->resolveTarget($controllerClass), $resourceItems);
+
+        return $this;
     }
 
 
@@ -663,38 +553,6 @@ class Router implements RouterInterface
     protected function isValidOption($indexOption): bool
     {
         return \in_array($indexOption, $this->getAllowedOptionParams());
-    }
-
-
-    /**
-     * @param $pathPrefix
-     * @param $controller
-     * @return array
-    */
-    protected function getResourceItems($pathPrefix, $controller): array
-    {
-        $prefixName = trim($pathPrefix, '/') . '.';
-        $resourceMap = [];
-
-        foreach (RouteStorage::getResourceItems() as $methods => $routes)
-        {
-            foreach ($routes as $routeItems)
-            {
-                list($pathSuffix, $action, $name) = $routeItems;
-                $lastLetter = substr($pathPrefix, -1); // get last letter of string
-
-                if($lastLetter === 's' && \in_array($action, RouteStorage::getResourceSingleActions())) {
-                    $pathPrefix = str_replace($lastLetter, '', $pathPrefix);
-                }
-
-                $route = $this->map($methods, $path = $pathPrefix. $pathSuffix, $target = $controller .'@'. $action, $name = $prefixName.$name);
-                $resourceMap['routes'][] = $route;
-            }
-        }
-
-        $resourceMap['actions'] = RouteStorage::getResourceActions();
-
-        return $resourceMap;
     }
 
 

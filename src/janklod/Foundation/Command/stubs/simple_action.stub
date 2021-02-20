@@ -1,0 +1,10 @@
+
+
+/**
+  * @param Request $request
+  * @return Response
+*/
+public function actionName(Request $request): Response
+{
+     return $this->render('templateFile', parameters);
+}

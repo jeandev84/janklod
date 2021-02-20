@@ -88,14 +88,6 @@ class Route
 
 
       /**
-       * @var bool
-      */
-      protected $isGroup = false;
-
-
-
-
-      /**
        * @var array
       */
       protected static $nameList = [];
@@ -108,36 +100,13 @@ class Route
        * @param array $methods
        * @param string $path
        * @param mixed|null $target
-       * @param string $prefixName
       */
-      public function __construct(array $methods = [], string $path = '', $target = null, string $prefixName = '')
+      public function __construct(array $methods = [], string $path = '', $target = null)
       {
             $this->setMethods($methods);
             $this->setPath($path);
             $this->setTarget($target);
-            $this->setPrefixName($prefixName);
       }
-
-
-
-      /**
-       * @param bool $isGroup
-      */
-      public function setIsGroup(bool $isGroup)
-      {
-           $this->isGroup = $isGroup;
-      }
-
-
-
-      /**
-       * @return bool
-      */
-      public function isGroup(): bool
-      {
-          return $this->isGroup;
-      }
-
 
 
 
