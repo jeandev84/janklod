@@ -12,5 +12,6 @@ return [
      |------------------------------------------------------------------
     */
     'layout'    => 'default', // name of default layout if you use php extension for templating (default.php)
+    'extension' => 'twig', // php , html.twig, html
     'compress'  => false
 ];

@@ -42,7 +42,7 @@ class RouteStorage
      */
      public static function getResourceSingularActions(): array
      {
-          return ['show', 'new', 'edit', 'restore', 'delete'];
+          return ['show', 'new', 'edit', 'delete', 'restore'];
      }
 
 

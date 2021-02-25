@@ -252,24 +252,45 @@ class Router  extends RouteCollection implements RouterInterface
     */
     public function resource(string $pathPrefix, string $controllerClass): Router
     {
-        $resourceItems = [];
         $resourceComponents = RouteStorage::makeResourceComponents($pathPrefix, $controllerClass);
 
         $templateDir = $this->resolvePath($pathPrefix);
+        $namespace = $this->getOption(self::KEY_OPTION_PARAM_NAMESPACE);
+
+        $resourceItems = [
+           'namespace'   =>  trim(ucfirst($namespace), '\\'),
+           'controller'  =>  $controllerClass,
+           'templateDir' =>  $templateDir,
+        ];
 
         foreach ($resourceComponents as $components) {
 
             list($methods, $path, $action, $name) = $components;
             $this->map($methods, $path , $controllerClass .'@'.  $action, $name);
-            $resourceItems['resources'][$action]  = $templateDir . '/'. $action. '.php';
+            $resourceItems['actions'][$action]  = [
+                '_routeName'      => $this->resolveName($name),
+                '_resourcePath'   => $templateDir . '/'. $action
+            ];
         }
 
-        $resourceItems['partials'][] = $templateDir . '/_form.php';
-        $resourceItems['resource'] = $templateDir;
+        /* $resourceItems['partials'][] = $templateDir . '/_form.php'; */
 
         $this->addResource($this->resolveTarget($controllerClass), $resourceItems);
 
         return $this;
+    }
+
+
+
+    /**
+     * @param string $entityClass
+     * @param string $controllerClass
+    */
+    public function crud(string $entityClass, string $controllerClass)
+    {
+         /* $this->addCrud($entityClass, $controllerClass); */
+         $path = str_replace('\\', '/', strtolower($entityClass));
+         $this->resource($path, $controllerClass);
     }
 
 

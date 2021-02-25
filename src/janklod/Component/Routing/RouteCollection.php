@@ -45,6 +45,14 @@ class RouteCollection
 
 
 
+//    /**
+//     * @var array
+//    */
+//    protected $cruds = [];
+
+
+
+
     /**
      * @param Route $route
      * @return Route
@@ -80,6 +88,16 @@ class RouteCollection
         $this->groups[$index][] = $route;
     }
 
+
+
+//    /**
+//     * @param $entityClass
+//     * @param $controllerClass
+//    */
+//    public function addCrud($entityClass, $controllerClass)
+//    {
+//        $this->cruds[$entityClass] = $controllerClass;
+//    }
 
 
 
@@ -162,4 +180,14 @@ class RouteCollection
     {
         return $this->resources[$controllerClass] ?? [];
     }
+
+
+//
+//    /**
+//     * @return array
+//    */
+//    public function getCrud(): array
+//    {
+//        return $this->cruds;
+//    }
 }
