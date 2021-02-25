@@ -18,6 +18,19 @@
 //dd($routeCollection->getRoutes());
 
 
+
+/*
+Append file
+$file = realpath(__DIR__ . '/../../routes/demo/app.php');
+$content = "\n\n". 'Route::resource("/post", "PostController");'. "\n";
+
+
+if(file_put_contents($file, $content, FILE_APPEND | LOCK_EX)) {
+    // dd('OK');
+}
+*/
+
+
 use Jan\Component\Routing\Router;
 
 $router = new Router();
