@@ -57,6 +57,26 @@ class Router  extends RouteCollection implements RouterInterface
 
 
     /**
+     * @var array
+    */
+    protected $resourceItems = [
+        'GET' => [
+            ['', 'index', 'list'],
+            ['/{id}', 'show', 'show'],
+            ['/{id}/restore', 'restore', 'restore'],
+        ],
+        'GET|POST' => [
+            ['/new', 'new', 'new'],
+            ['/{id}/edit', 'edit', 'edit'],
+        ],
+        'DELETE' => [
+            ['/{id}/delete', 'delete', 'delete'],
+        ]
+    ];
+
+
+
+    /**
      * Router constructor.
      * @param
     */
@@ -114,10 +134,10 @@ class Router  extends RouteCollection implements RouterInterface
     public function map($methods, string $path, $target, string $name = null): Route
     {
         /* resolve given params */
-        list($methods, $path, $target) = array_values(
-            $this->resolvedRouteParams($methods, $path, $target)
-        );
-
+        // resolve given params
+        $methods    = $this->resolveMethods($methods);
+        $path       = $this->resolvePath($path);
+        $target     = $this->resolveTarget($target);
         $middleware = $this->getOption(static::OPTION_PARAM_MIDDLEWARE, []);
         $prefixName = $this->getOption(static::OPTION_PARAM_NAME_PREFIX, '');
 
@@ -635,6 +655,44 @@ class Router  extends RouteCollection implements RouterInterface
         }
 
         return $parameters;
+    }
+
+
+
+    /**
+     * @return string[]
+    */
+    private static function getResourceSingularActions(): array
+    {
+        return ['show', 'new', 'edit', 'delete', 'restore'];
+    }
+
+
+    /**
+     * @param $pathPrefix
+     * @return array
+    */
+    private function makeResourceComponents($pathPrefix): array
+    {
+        $resourceComponents = [];
+
+        foreach ($this->resourceItems as $methods => $routes)
+        {
+            foreach ($routes as $routeItems)
+            {
+                list($pathSuffix, $action, $name) = $routeItems;
+                $lastLetter = substr($pathPrefix, -1); // get last letter of string
+
+                if($lastLetter === 's' && \in_array($action, static::getResourceSingularActions())) {
+                    $pathPrefix = str_replace($lastLetter, '', $pathPrefix);
+                }
+
+                $name = trim($pathPrefix, '/') . '.' . $name;
+                $resourceComponents[] = [$methods, $pathPrefix. $pathSuffix, $action, $name];
+            }
+        }
+
+        return $resourceComponents;
     }
     
 }
