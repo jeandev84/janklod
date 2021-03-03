@@ -522,7 +522,7 @@ class Router  extends RouteCollection implements RouterInterface
     {
         if(\is_string($target) && $namespace = $this->getOption(static::OPTION_PARAM_NAMESPACE))
         {
-            $target = rtrim($namespace, '\\') .'\\' . $target;
+            $target = rtrim(ucfirst($namespace), '\\') .'\\' . $target;
         }
 
         return $target;
