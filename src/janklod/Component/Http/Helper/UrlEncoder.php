@@ -1,10 +1,11 @@
 <?php
-namespace Jan\Component\Http\Encoder;
+namespace Jan\Component\Http\Helper;
 
 
 /**
  * Class UrlEncoder
- * @package Jan\Component\Http\Encoder
+ *
+ * @package Jan\Component\Http\Helper
 */
 class UrlEncoder
 {
@@ -12,7 +13,7 @@ class UrlEncoder
       * @param $url
       * @return string
      */
-     public static function encode($url)
+     public static function encode($url): string
      {
          return urlencode($url);
      }
@@ -22,7 +23,7 @@ class UrlEncoder
       * @param $url
       * @return string
      */
-     public static function decode($url)
+     public static function decode($url): string
      {
          return urldecode($url);
      }

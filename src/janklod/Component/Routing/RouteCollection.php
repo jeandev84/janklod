@@ -2,9 +2,6 @@
 namespace Jan\Component\Routing;
 
 
-use Closure;
-use Exception;
-
 
 
 /**
@@ -42,6 +39,12 @@ class RouteCollection
     */
     protected $resources = [];
 
+
+
+    /**
+     * @var array
+    */
+    protected $nameList = [];
 
 
 
@@ -147,7 +150,7 @@ class RouteCollection
     /**
      * @return array
      */
-    public function getRoutesByMethods(): array
+    public function getRoutesByMethod(): array
     {
         $routes = [];
 

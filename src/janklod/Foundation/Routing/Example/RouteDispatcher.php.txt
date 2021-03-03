@@ -12,7 +12,6 @@ use Jan\Component\Routing\Route;
 use Jan\Component\Routing\Router;
 use Jan\Foundation\Exception\NotFoundException;
 use Jan\Foundation\Routing\DefaultController;
-use Jan\Foundation\Routing\ResponseProcess;
 use ReflectionException;
 
 
@@ -111,6 +110,7 @@ class RouteDispatcher
 
           if(! $route instanceof Route) {
 
+              // dd("Route ". $uri . " not found!");
               throw new NotFoundException('Route '. $uri .' not found!', 404);
           }
 
@@ -141,8 +141,28 @@ class RouteDispatcher
       */
       protected function process($respond)
       {
-          $responseProcess = new ResponseProcess($respond);
-          return $responseProcess->response();
+          if(is_null($respond))
+          {
+              return new Response(null, 200);
+          }
+
+          if($respond instanceof Response)
+          {
+              return $respond;
+          }
+
+          if(is_array($respond))
+          {
+              return new JsonResponse($respond, 200);
+          }
+
+          if(is_string($respond))
+          {
+              return new Response($respond, 200);
+          }
+
+          // TODO reflect if need to place this here
+          return new Response(null, 200);
       }
 
 

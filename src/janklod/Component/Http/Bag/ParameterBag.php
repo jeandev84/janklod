@@ -2,11 +2,15 @@
 namespace Jan\Component\Http\Bag;
 
 
+use Jan\Component\Http\Bag\Contract\ParameterBagInterface;
+
+
+
 /**
  * Class ParameterBag
  * @package Jan\Component\Http\Bag
 */
-class ParameterBag
+class ParameterBag implements ParameterBagInterface
 {
 
     /**
@@ -15,13 +19,14 @@ class ParameterBag
     protected $data = [];
 
 
+
     /**
      * ParameterBag constructor.
      * @param array $data
     */
     public function __construct(array $data)
     {
-        $this->data = $data;
+          $this->data = $data;
     }
     
 

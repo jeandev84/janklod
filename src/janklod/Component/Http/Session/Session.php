@@ -17,8 +17,7 @@ class Session implements SessionInterface
       */
       public function __construct()
       {
-           if(session_status() === PHP_SESSION_NONE && ! headers_sent())
-           {
+           if(session_status() === PHP_SESSION_NONE && ! headers_sent()) {
                 session_start();
            }
       }

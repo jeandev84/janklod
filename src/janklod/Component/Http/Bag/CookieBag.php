@@ -1,13 +1,14 @@
 <?php
-namespace Jan\Component\Http\Cookie;
+namespace Jan\Component\Http\Bag;
+
 
 
 /**
- * Class CookieJar
+ * Class CookieBag
  *
- * @package Jan\Component\Http\Cookie
+ * @package Jan\Component\Http\Cookie\Bag
 */
-class CookieJar
+class CookieBag
 {
 
       /**
@@ -15,31 +16,29 @@ class CookieJar
       */
       protected $data = [];
 
-      
-
 
       /**
        * Cookie constructor.
-       * @param array $cookies
+       * @param array $data
       */
-      public function __construct(array $cookies = [])
+      public function __construct(array $data = [])
       {
-          if(! $cookies)
-          {
-              $cookies = $_COOKIE;
+          if(! $data) {
+              $data = $_COOKIE;
           }
 
-          $this->data = $cookies;
+          $this->data = $data;
       }
+
 
 
       /**
        * @param $name
        * @param $value
        * @param int $expire
-       * @return CookieJar
+       * @return CookieBag
       */
-      public function set($name, $value, $expire = 3600)
+      public function write($name, $value, $expire = 3600)
       { 
           /* setcookie($name, $value, time() + $expire); */
           /* 
@@ -51,11 +50,12 @@ class CookieJar
       }
 
 
+
       /**
        * @param $name
        * @return bool
       */
-      public function has($name)
+      public function exists($name)
       {
            return \array_key_exists($name, $this->data);
       }
@@ -70,6 +70,7 @@ class CookieJar
       {
           return $this->data[$name] ?? null;
       }
+
 
 
       /**

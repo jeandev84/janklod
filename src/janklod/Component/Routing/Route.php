@@ -356,6 +356,17 @@ class Route
      }
 
 
+
+     /**
+      * @param string $name
+      * @return Route
+     */
+     public function whereSlug(string $name): Route
+     {
+        return $this->where($name, '[a-z\-0-9]+'); // (\w+)
+     }
+
+
      /**
       * get route methods
       *
