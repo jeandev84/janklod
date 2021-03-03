@@ -107,20 +107,22 @@ class DatabaseManager implements ManagerInterface
      /**
       * @return bool
      */
-     public function isConnected()
+     public function isConnected(): bool
      {
          return $this->connection === true;
      }
 
 
-
-
      /**
-      * @param string $key
-      * @return Configuration|null
+      * @param string|null $key
+      * @return Configuration|mixed|null
      */
-     public function config(string $key): ?Configuration
+     public function config(string $key = null): ?Configuration
      {
+          if(! $key) {
+              return $this->config;
+          }
+
           return $this->config->get($key);
      }
 
