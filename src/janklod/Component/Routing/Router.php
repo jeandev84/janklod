@@ -125,7 +125,7 @@ class Router  extends RouteCollection implements RouterInterface
         $route->where($this->patterns);
         $route->setPrefixName($prefixName);
         $route->middleware($middleware);
-        $route->addOptions($this->routeOptionParameters());
+        $route->addOptions($this->routeOptions());
 
         if($name) {
             $route->name($name);
@@ -456,7 +456,7 @@ class Router  extends RouteCollection implements RouterInterface
     protected function resolveTarget($target): string
     {
         if(\is_string($target) && $namespace = $this->getNamespace()) {
-            $target = rtrim($namespace, '\\') .'\\' . $target;
+            $target = rtrim(ucfirst($namespace), '\\') .'\\' . $target;
         }
 
         return $target;
@@ -616,7 +616,7 @@ class Router  extends RouteCollection implements RouterInterface
     /**
      * @return string[]
     */
-    protected function routeOptionParameters(): array
+    protected function routeOptions(): array
     {
         $parameters = [];
 
