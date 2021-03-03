@@ -272,7 +272,7 @@ class Router  extends RouteCollection implements RouterInterface
     */
     public function resource(string $pathPrefix, string $controllerClass): Router
     {
-        $resourceComponents = RouteStorage::makeResourceComponents($pathPrefix, $controllerClass);
+        $resourceComponents = $this->makeResourceComponents($pathPrefix);
 
         $templateDir = $this->resolvePath($pathPrefix);
         $namespace = $this->getOption(self::KEY_OPTION_PARAM_NAMESPACE);
@@ -658,16 +658,6 @@ class Router  extends RouteCollection implements RouterInterface
     }
 
 
-
-    /**
-     * @return string[]
-    */
-    private static function getResourceSingularActions(): array
-    {
-        return ['show', 'new', 'edit', 'delete', 'restore'];
-    }
-
-
     /**
      * @param $pathPrefix
      * @return array
@@ -683,7 +673,7 @@ class Router  extends RouteCollection implements RouterInterface
                 list($pathSuffix, $action, $name) = $routeItems;
                 $lastLetter = substr($pathPrefix, -1); // get last letter of string
 
-                if($lastLetter === 's' && \in_array($action, static::getResourceSingularActions())) {
+                if($lastLetter === 's' && \in_array($action, $this->getResourceSingularActions())) {
                     $pathPrefix = str_replace($lastLetter, '', $pathPrefix);
                 }
 
@@ -694,5 +684,14 @@ class Router  extends RouteCollection implements RouterInterface
 
         return $resourceComponents;
     }
-    
+
+
+    /**
+     * @return string[]
+    */
+    private  function getResourceSingularActions(): array
+    {
+        return ['show', 'new', 'edit', 'delete', 'restore'];
+    }
+
 }
