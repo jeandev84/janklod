@@ -473,33 +473,33 @@ class Request
     }
 
 
-    /**
-     * get param forced integer
-     *
-     * $page = $this->getInt('page', 1)
-     * The same like : $page = (int) ($_GET['page'] ?? 1)
-     *
-     * @param string $name
-     * @param int|null $default
-     * @return int|null
-     * @throws \Exception
-    */
-    public function getInt(string $name, int $default = null)
-    {
-         $param = $this->queryParams->get($name);
-
-         if(! $this->queryParams->has($name))
-         {
-             return $default;
-         }
-
-         if(! filter_var($param, FILTER_VALIDATE_INT))
-         {
-             throw new \Exception(sprintf("This param [ %s ] in url must be integer", $name));
-         }
-
-         return (int) $this->queryParams->get($name);
-    }
+//    /**
+//     * get param forced integer
+//     *
+//     * $page = $this->getInt('page', 1)
+//     * The same like : $page = (int) ($_GET['page'] ?? 1)
+//     *
+//     * @param string $name
+//     * @param int|null $default
+//     * @return int|null
+//     * @throws \Exception
+//    */
+//    public function getInt(string $name, int $default = null)
+//    {
+//         $param = $this->queryParams->get($name);
+//
+//         if(! $this->queryParams->has($name))
+//         {
+//             return $default;
+//         }
+//
+//         if(! filter_var($param, FILTER_VALIDATE_INT))
+//         {
+//             throw new \Exception(sprintf("This param [ %s ] in url must be integer", $name));
+//         }
+//
+//         return (int) $this->queryParams->get($name);
+//    }
 
 
     /**

@@ -68,6 +68,16 @@ class ParameterBag implements ParameterBagInterface
         return $this->data[$key] ?? $default;
     }
 
+
+    /**
+     * @param $key
+     * @param int $default
+     * @return int
+    */
+    public function getInt($key, $default = 0): int
+    {
+        return (int) $this->get($key, $default);
+    }
     
 
     /**
