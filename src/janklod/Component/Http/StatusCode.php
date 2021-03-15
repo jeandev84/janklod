@@ -86,4 +86,19 @@ trait StatusCode
         511 => 'Network Authentication Required',
         599 => 'Network Connect Timeout Error',
     ];
+
+
+    /**
+     * @param int $status
+     * @return string
+    */
+    public function getStatusMessage(int $status): string
+    {
+         if(! \array_key_exists($status, $this->messages))
+         {
+              return '';
+         }
+
+         return $this->messages[$status];
+    }
 }

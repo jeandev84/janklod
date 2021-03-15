@@ -211,9 +211,10 @@ class Response implements ResponseInterface
     }
 
 
+
     /**
      * @return array
-     */
+    */
     public function getHeaders()
     {
         return $this->headers;

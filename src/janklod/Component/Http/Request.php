@@ -388,7 +388,7 @@ class Request
     {
         if($this->content === null)
         {
-           $this->content = file_get_contents('php://input');
+            $this->content = file_get_contents('php://input');
         }
         
         return $this->content;

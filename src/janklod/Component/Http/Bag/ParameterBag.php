@@ -74,7 +74,7 @@ class ParameterBag implements ParameterBagInterface
      * @param int $default
      * @return int
     */
-    public function getInt($key, $default = 0): int
+    public function getInt($key, int $default = 0): int
     {
         return (int) $this->get($key, $default);
     }
